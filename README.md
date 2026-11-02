@@ -103,3 +103,4 @@ python run.py
 pyinstaller --noconfirm UTM_Staff_Memo.spec
 ```
 Готовый файл `UTM_Staff_Memo.exe` появится в папке `dist/`. Рядом с ним можно положить настроенный файл `.env`, и приложение автоматически считает параметры при запуске.
+
