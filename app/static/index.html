@@ -10,15 +10,15 @@
 
   <style>
     /* ==========================================================================
-       Design System & Variables (Apple Dark Graphite Aesthetic)
+       Design System & Variables (Apple Dark Graphite & Fluid Glow)
        ========================================================================== */
     :root {
-      --bg-dark: #08090c;
-      --card-bg: rgba(255, 255, 255, 0.035);
-      --card-bg-hover: rgba(255, 255, 255, 0.055);
+      --bg-dark: #07080a;
+      --card-bg: rgba(18, 20, 26, 0.55);
+      --card-bg-hover: rgba(26, 29, 38, 0.65);
       --card-border: rgba(255, 255, 255, 0.08);
-      --card-border-hover: rgba(255, 255, 255, 0.16);
-      --card-blur: blur(28px);
+      --card-border-hover: rgba(255, 255, 255, 0.18);
+      --card-blur: blur(32px);
       
       --accent-blue: #0a84ff;
       --accent-blue-hover: #0071e3;
@@ -28,8 +28,8 @@
       --accent-rose: #ff453a;
 
       --text-primary: #f5f5f7;
-      --text-secondary: #86868b;
-      --text-muted: #4e4e52;
+      --text-secondary: #8e8e93;
+      --text-muted: #545458;
 
       --radius-sm: 8px;
       --radius-md: 14px;
@@ -62,8 +62,8 @@
       padding: 1rem 1.25rem 4rem;
     }
 
-    /* Background Canvas */
-    #aura-canvas {
+    /* Ambient Canvas */
+    #ambient-canvas {
       position: fixed;
       top: 0;
       left: 0;
@@ -71,7 +71,12 @@
       height: 100vh;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.65;
+      opacity: 0;
+      transition: opacity 2.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #ambient-canvas.ignited {
+      opacity: 1;
     }
 
     .bg-grid {
@@ -81,13 +86,14 @@
       width: 100%;
       height: 100%;
       background-image: 
-        radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
       background-size: 32px 32px;
-      opacity: 0.22;
+      opacity: 0.18;
       pointer-events: none;
       z-index: 1;
     }
 
+    /* Opening Ignition Animation for App Content */
     .app-wrapper {
       position: relative;
       z-index: 2;
@@ -96,6 +102,20 @@
       display: flex;
       flex-direction: column;
       gap: 1.75rem;
+      animation: page-ignite 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes page-ignite {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.99);
+        filter: blur(6px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
     }
 
     /* ==========================================================================
@@ -121,7 +141,7 @@
 
     .nav-badge {
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.09);
       padding: 0.2rem 0.55rem;
       border-radius: var(--radius-full);
       font-family: var(--font-mono);
@@ -150,6 +170,7 @@
       text-decoration: none;
       cursor: pointer;
       font-family: inherit;
+      backdrop-filter: blur(12px);
       transition: var(--transition-apple);
     }
 
@@ -161,8 +182,8 @@
     }
 
     .nav-btn.active {
-      background: rgba(10, 132, 255, 0.15);
-      border-color: rgba(10, 132, 255, 0.35);
+      background: rgba(10, 132, 255, 0.18);
+      border-color: rgba(10, 132, 255, 0.4);
       color: #70b4ff;
     }
 
@@ -188,7 +209,7 @@
       font-size: 0.75rem;
       font-weight: 500;
       color: var(--text-secondary);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
     }
 
     .status-dot {
@@ -209,7 +230,7 @@
       font-size: 2.35rem;
       font-weight: 700;
       letter-spacing: -0.035em;
-      background: linear-gradient(180deg, #ffffff 40%, rgba(255, 255, 255, 0.65) 100%);
+      background: linear-gradient(180deg, #ffffff 40%, rgba(255, 255, 255, 0.7) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -230,7 +251,7 @@
       backdrop-filter: var(--card-blur);
       border-radius: var(--radius-lg);
       padding: 1.35rem;
-      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.65);
       display: flex;
       flex-direction: column;
       gap: 1.15rem;
@@ -238,13 +259,13 @@
     }
 
     .search-panel:focus-within {
-      border-color: rgba(10, 132, 255, 0.4);
-      box-shadow: 0 30px 60px -12px rgba(10, 132, 255, 0.15), 0 0 0 1px rgba(10, 132, 255, 0.25);
+      border-color: rgba(10, 132, 255, 0.45);
+      box-shadow: 0 30px 60px -12px rgba(10, 132, 255, 0.2), 0 0 0 1px rgba(10, 132, 255, 0.3);
     }
 
     .segmented-control {
       display: flex;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(0, 0, 0, 0.4);
       padding: 4px;
       border-radius: var(--radius-md);
       position: relative;
@@ -304,7 +325,7 @@
 
     .search-input {
       width: 100%;
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(0, 0, 0, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.09);
       border-radius: var(--radius-md);
       padding: 0.95rem 7.5rem 0.95rem 3rem;
@@ -316,7 +337,7 @@
     }
 
     .search-input:focus {
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.7);
       border-color: var(--accent-blue);
     }
 
@@ -402,7 +423,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 1.5rem;
-      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.55);
     }
 
     .hero-profile {
@@ -517,7 +538,7 @@
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
-      box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.45);
       transition: var(--transition-apple);
     }
 
@@ -852,7 +873,7 @@
         color: #000000 !important;
         padding: 0 !important;
       }
-      #aura-canvas, .bg-grid, .top-navbar, .search-panel, .hero-actions, .copy-pill, .console-overlay {
+      #ambient-canvas, .bg-grid, .top-navbar, .search-panel, .hero-actions, .copy-pill, .console-overlay {
         display: none !important;
       }
       .app-wrapper {
@@ -898,8 +919,8 @@
 </head>
 <body>
 
-  <!-- Dynamic Cursor Aura Canvas -->
-  <canvas id="aura-canvas"></canvas>
+  <!-- Continuous Ambient Fluid Aurora Canvas -->
+  <canvas id="ambient-canvas"></canvas>
   <div class="bg-grid"></div>
 
   <div class="app-wrapper">
@@ -1168,9 +1189,9 @@
 
   <script>
     // ==========================================================================
-    // Interactive Cursor Aura Simulation (Physics Spring Lerp)
+    // Continuous Fluid Aurora Ambient Animation (Lissajous Orbital Drift)
     // ==========================================================================
-    const canvas = document.getElementById('aura-canvas');
+    const canvas = document.getElementById('ambient-canvas');
     const ctx = canvas.getContext('2d');
     
     let width = canvas.width = window.innerWidth;
@@ -1181,40 +1202,97 @@
       height = canvas.height = window.innerHeight;
     });
 
-    let targetX = width / 2;
-    let targetY = height * 0.35;
-    let currentX = targetX;
-    let currentY = targetY;
-
-    window.addEventListener('pointermove', (e) => {
-      targetX = e.clientX;
-      targetY = e.clientY;
+    // Мягкий старт "загорания" фона при первой загрузке страницы
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        canvas.classList.add('ignited');
+      }, 80);
     });
 
-    function renderAura() {
-      currentX += (targetX - currentX) * 0.055;
-      currentY += (targetY - currentY) * 0.055;
+    // Определение органических световых сфер (орбов) в глубоких темных тонах
+    const orbs = [
+      {
+        // Неоново-лазурный (акцент биллинга)
+        color: [10, 132, 255],
+        alpha: 0.17,
+        radius: 460,
+        speedX: 0.00045,
+        speedY: 0.00035,
+        rangeX: 0.32,
+        rangeY: 0.28,
+        offsetX: 0.25,
+        offsetY: 0.30,
+        phase: 0
+      },
+      {
+        // Глубокий ночной индиго / фиолетовый
+        color: [94, 92, 230],
+        alpha: 0.15,
+        radius: 520,
+        speedX: 0.00038,
+        speedY: 0.00048,
+        rangeX: 0.35,
+        rangeY: 0.32,
+        offsetX: 0.72,
+        offsetY: 0.35,
+        phase: Math.PI * 0.5
+      },
+      {
+        // Мягкий изумрудно-бирюзовый оттенок (статус сети)
+        color: [48, 209, 88],
+        alpha: 0.08,
+        radius: 420,
+        speedX: 0.00052,
+        speedY: 0.00041,
+        rangeX: 0.30,
+        rangeY: 0.25,
+        offsetX: 0.45,
+        offsetY: 0.70,
+        phase: Math.PI
+      },
+      {
+        // Сумеречный сапфировый / пурпурный
+        color: [191, 90, 242],
+        alpha: 0.11,
+        radius: 490,
+        speedX: 0.00032,
+        speedY: 0.00055,
+        rangeX: 0.28,
+        rangeY: 0.34,
+        offsetX: 0.60,
+        offsetY: 0.60,
+        phase: Math.PI * 1.5
+      }
+    ];
 
+    let startTime = performance.now();
+
+    function renderAmbient(timestamp) {
+      const elapsed = timestamp - startTime;
+
+      // Мягкая очистка каждого кадра
       ctx.clearRect(0, 0, width, height);
 
-      const grad1 = ctx.createRadialGradient(currentX, currentY, 10, currentX, currentY, 480);
-      grad1.addColorStop(0, 'rgba(10, 132, 255, 0.16)');
-      grad1.addColorStop(0.5, 'rgba(94, 92, 230, 0.08)');
-      grad1.addColorStop(1, 'transparent');
+      // Отрисовываем каждую световую сферу с плавным движением по орбите Лиссажу
+      for (const orb of orbs) {
+        const x = width * orb.offsetX + Math.sin(elapsed * orb.speedX + orb.phase) * (width * orb.rangeX);
+        const y = height * orb.offsetY + Math.cos(elapsed * orb.speedY + orb.phase) * (height * orb.rangeY);
 
-      ctx.fillStyle = grad1;
-      ctx.fillRect(0, 0, width, height);
+        // Дышащий радиус для эффекта живого перелива
+        const dynamicRadius = orb.radius + Math.sin(elapsed * 0.0008 + orb.phase) * 45;
 
-      const grad2 = ctx.createRadialGradient(width - currentX * 0.5, height * 0.2, 50, width - currentX * 0.5, height * 0.2, 550);
-      grad2.addColorStop(0, 'rgba(48, 209, 88, 0.05)');
-      grad2.addColorStop(1, 'transparent');
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(10, dynamicRadius));
+        grad.addColorStop(0, `rgba(${orb.color[0]}, ${orb.color[1]}, ${orb.color[2]}, ${orb.alpha})`);
+        grad.addColorStop(0.55, `rgba(${orb.color[0]}, ${orb.color[1]}, ${orb.color[2]}, ${orb.alpha * 0.45})`);
+        grad.addColorStop(1, 'transparent');
 
-      ctx.fillStyle = grad2;
-      ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+      }
 
-      requestAnimationFrame(renderAura);
+      requestAnimationFrame(renderAmbient);
     }
-    renderAura();
+    requestAnimationFrame(renderAmbient);
 
     // ==========================================================================
     // Tab Segment Switching Logic
