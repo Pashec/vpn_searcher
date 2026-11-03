@@ -1,0 +1,106 @@
+import sys
+import tempfile
+from pathlib import Path
+
+CLIENT_CERT_PEM = """-----BEGIN CERTIFICATE-----
+MIIDnTCCAoUCFAlY9JP8qXWOE5ivu7YxHpWePgavMA0GCSqGSIb3DQEBCwUAMIGL
+MQswCQYDVQQGEwJSVTEPMA0GA1UECAwGTW9zY293MQ8wDQYDVQQHDAZNb3Njb3cx
+EzARBgNVBAoMCk5ldFVQIEluYy4xEDAOBgNVBAsMB1Jvb3QgQ0ExFTATBgNVBAMM
+DHd3dy5uZXR1cC5ydTEcMBoGCSqGSIb3DQEJARYNaW5mb0BuZXR1cC5ydTAeFw0y
+MDA1MDYxMTU3MjRaFw00MDA1MDExMTU3MjRaMIGJMQswCQYDVQQGEwJSVTEPMA0G
+A1UECAwGTW9zY293MQ8wDQYDVQQHDAZNb3Njb3cxDjAMBgNVBAoMBU5ldFVQMRsw
+GQYDVQQLDBJTdXBwb3J0IERlcGFydG1lbnQxDTALBgNVBAMMBFVSRkExHDAaBgkq
+hkiG9w0BCQEWDWluZm9AbmV0dXAucnUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+ggEKAoIBAQCvrJNr4FnIERGmg0spr/1s0o91zDnjjF9FARtE7n0DSkrh7woepL+C
+8oW0jwgSRG/8abd8E/zZ+RfkQo4z89Kbxmr/EqVMCMO0FExtXLZTRyBJuWOCF3LS
+aGqLOyXd7R1dxnNjIz7IxPNQZoyrX/ebtustrTC1SRMdKUtXr0Co7h+fVV74brMY
+xs+q4ok7FqtO6Q/Vm6CcGXY73FzHBPv8tcpa4rAtihQ4AZtT6QUf8OCUTGDuIbgf
+g6eevotdRSfLyCwPK+8jS24NaeFjaFlsCu/lW23+4v49rQ+3VjVHx6GJ0HicNUSh
+Kvh4nfJbRuYJt6XnkqTMqBuR4YJ0H3a1AgMBAAEwDQYJKoZIhvcNAQELBQADggEB
+AFIQk7TsQ48uOsyzG1KB9Ork0wnmmvOqChr4hG7C3YxIxLYbIQt90TQrioqvSwjX
+YHBbE7aAcd3mZiWAQHAxWGbj7wuix3bClqjGk+t1eG/eR4gOVQ5AQtzVm9pRDfof
++VTuHjHh3YXVDlxx+v7lZzww8oHPs0eIZD44+EnQaI/4oMaTv+nBS9pW8E8q90uM
+qqfmaYWHI2wxzJuClSlu/IEhj1ruROYfx6Ml7IYtXeJmv9aAx6uQtg09Ok/+qHaa
+cuVOYfvNxUu4/qJjUKRckxzbgcEcsTJxDJa2rBEXoXebA+8EzTwy5As9VS7HR0cm
+Ccn5zmku/tw/dYRnP/kFeBs=
+-----END CERTIFICATE-----
+"""
+
+CLIENT_KEY_PEM = """-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEAr6yTa+BZyBERpoNLKa/9bNKPdcw544xfRQEbRO59A0pK4e8K
+HqS/gvKFtI8IEkRv/Gm3fBP82fkX5EKOM/PSm8Zq/xKlTAjDtBRMbVy2U0cgSblj
+ghdy0mhqizsl3e0dXcZzYyM+yMTzUGaMq1/3m7brLa0wtUkTHSlLV69AqO4fn1Ve
++G6zGMbPquKJOxarTukP1ZugnBl2O9xcxwT7/LXKWuKwLYoUOAGbU+kFH/DglExg
+7iG4H4Onnr6LXUUny8gsDyvvI0tuDWnhY2hZbArv5Vtt/uL+Pa0Pt1Y1R8ehidB4
+nDVEoSr4eJ3yW0bmCbel55KkzKgbkeGCdB92tQIDAQABAoIBADJkL3l/RmG0O7rm
+6HWRzQEdOReSOHzENEPH+HmCa4u5ENfUSLPXkDPQu3e6m5cZ2IGwFXjbBunDoQ3R
+5ZaTdzNF7EU0pQO1c+XA+NdaA9bJjUJ4kkmrzjz6xK0hj1AkhwryNQEYCBdxH1ZN
+xEYYZh9djgJxLoqh5oCz6q/BTqvmAJIOSfzjjD8Eo41cRAmqRbuUyvFoUeighLx8
+gCqO3tT2ORf6TFlM4f1wQt59di/TOJN/y7klIe7HDZgaC1Da6ySijpv5+El6bS3g
+DlLsde0/NGshDpvkk4h9ZbtebSSKkgdMAejhwSzkbMPPlOPw7nnfTCYdB2ZDbTY0
+tHbjlaECgYEA3kN2Z6TvYx4+kFo7akYQRlKUcUNmVzyn0D6i7G664wCwAxS4KpxW
+LWHJsWz7yeudF0ij5hkJbEY7RepNd1kSpwW5dP0L8ELx6FdET/tNCivt/nmLbCeA
+isPFdkltxo4YgdTPRgxX/wM6pVy1O0RrsWgIifbfBvbNVCuG85S2Ec0CgYEAylbH
+o2lDyZPQrB7v2Q7k/BcVDuowVsz3NM/fwdGtcoX/L8mc5Ir2cNykf1U9UlZIzhDI
+lmHEp7Akyx4iSzlfEuzmPWcQiS+KcSGIeJFz/YjKB3a2v/WZjmlDxluCGhByVxCj
+U9vemw868OGJ5h4r4pLe+ail0JWwrhNowJU/sIkCgYEA1H4q9Wv6cgi4R8n8g934
+MUNCKAcIEN8skStRGDnE8sH1hPyKFjLhMQIMklRfZOydg2UvTQ0itSFwCae36CKA
+cq5GYFKM12cpX7gO12iqfs8A+gm6AezCN+hzIGOTUAEJ7RZIE/A5MNUlfHLl0YPY
+cgPEJiKfl0jdhVsX6kiCyQECgYBzRW0Gk3mi5SsEY7uQlQOu+hdtH83aJXrQA30e
+Fi4SCHSQ7PMM4H31Xj34rL76oV1ox/b+dURro9XSQaCX6l9XkM66PHUXMpZUTR5K
+UdMapUszZVZHlcudbirGXmuIHcaGA1yI8cGn5M1XXaYKCzZFJhcRdBrC8gRtp3EO
+Bfj6wQKBgFAIoZfIdNWbxaMPri+pxQ6oAVhsR9tANZ1YNQh9GO1yLKK6HVh0PCD3
+YJRAnPDef3zkxPdcXRdxGUzTYtJlPVCK9EAatnNq1OMX0k8vXv8r5g6F/Srqfqmr
+SODDRTDIDKoPmDmBiC8nX6MYTFggEpvCh6eOBeJx+O6/Cn6aQ0Fg
+-----END RSA PRIVATE KEY-----
+"""
+
+ROOT_CA_PEM = """-----BEGIN CERTIFICATE-----
+MIID+TCCAuGgAwIBAgIUeu/VWsRhFVTYU+wlBju+p4miTBowDQYJKoZIhvcNAQEF
+BQAwgYsxCzAJBgNVBAYTAlJVMQ8wDQYDVQQIDAZNb3Njb3cxDzANBgNVBAcMBk1v
+c2NvdzETMBEGA1UECgwKTmV0VVAgSW5jLjEQMA4GA1UECwwHUm9vdCBDQTEVMBMG
+A1UEAwwMd3d3Lm5ldHVwLnJ1MRwwGgYJKoZIhvcNAQkBFg1pbmZvQG5ldHVwLnJ1
+MB4XDTIwMDQzMDE1MDIyNVoXDTQwMDQyNTE1MDIyNVowgYsxCzAJBgNVBAYTAlJV
+MQ8wDQYDVQQIDAZNb3Njb3cxDzANBgNVBAcMBk1vc2NvdzETMBEGA1UECgwKTmV0
+VVAgSW5jLjEQMA4GA1UECwwHUm9vdCBDQTEVMBMGA1UEAwwMd3d3Lm5ldHVwLnJ1
+MRwwGgYJKoZIhvcNAQkBFg1pbmZvQG5ldHVwLnJ1MIIBIjANBgkqhkiG9w0BAQEF
+AAOCAQ8AMIIBCgKCAQEAw6sahP6ojAyvXLorRx+7qu8x5Pql4PkUg9trghyv+/SU
+gzVyF7lnbd/EqkYhs3rU3stJO6PXQu0vKLwjfZslZQZl9OoQhcUGqZD5AG1ledDM
+lqk79YqQCQ2h0T5nlO09+ppke9OfHd6z/ACPbwX7ljIvRxXwgTeRWcA3XqjP+H1+
+6vVEIL3iula9IJcB5uR1HwG29TzD0yhh2QOly0F2+XiZhX6+bFhsc+uvRhL1D8vy
+yW2ZvbJOtX40i9xqArDFO+dqoIGVFRrSPJrPQBPV/M+UzpNvAIHaMgGlcYWqk/zV
+QaXuGR8uJHFANEu4Z/52KJStEK+kahCDHXtu6q3grQIDAQABo1MwUTAdBgNVHQ4E
+FgQUUI0l3QJaQFTdLPF1hmcygdqRZ/IwHwYDVR0jBBgwFoAUUI0l3QJaQFTdLPF1
+hmcygdqRZ/IwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAQEAahqE
+3z0DqJuQ+O9IHc8EgysEnJRPS2RcA9jZgZL7VeefOY9SphWdpEpDo65BGm3KAD9k
+3lhJw5YjEQQUsjsfFd7xM0GNYWmdHHwh2pOQukst5x3Q0w5zCOJNnYkqGnQojndF
+3ZVnmtl8QaF+yx/CpBDutQKRuMLYcsC21Jid8zW0sBbudXf+LEilAZTz6Mh7xwbe
+oFQWjQ1nL/XTkPbdF4yds/x8hOyEBPpYdkN/DHZ6Nj6UT9NPah0CraGb5K/MtHVc
+odpJiBxDroUCmraPIjJSLFY7N/H3QlZLBOFj1tdxaCQU7Ob7tG4WIjJMpv+BsqcW
+kEfcw8agnEJwEIb+1w==
+-----END CERTIFICATE-----
+"""
+
+
+def get_cert_paths() -> tuple[str, str]:
+    """
+    Возвращает пути к файлам клиентского сертификата и закрытого ключа.
+    Если локальные файлы в директории certs/ отсутствуют, они автоматически
+    создаются на диске из встроенных констант.
+    """
+    certs_dir = Path(__file__).parent / "certs"
+    certs_dir.mkdir(parents=True, exist_ok=True)
+
+    cert_file = certs_dir / "client_cert.pem"
+    key_file = certs_dir / "client_key.pem"
+    ca_file = certs_dir / "root_ca.pem"
+
+    if not cert_file.exists():
+        cert_file.write_text(CLIENT_CERT_PEM.strip(), encoding="utf-8")
+    if not key_file.exists():
+        key_file.write_text(CLIENT_KEY_PEM.strip(), encoding="utf-8")
+    if not ca_file.exists():
+        ca_file.write_text(ROOT_CA_PEM.strip(), encoding="utf-8")
+
+    return str(cert_file), str(key_file)
+
