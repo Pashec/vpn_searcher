@@ -8,8 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.api.v1.admin import router as admin_router
+from app.api.v1.auth import router as auth_router
+from app.api.v1.history import router as history_router
 from app.api.v1.memo import router as memo_router
 from app.core.config import settings
+from app.core.database import get_avatars_dir, init_db
 
 # ------------------------------------------------------------------------------
 # In-Memory буфер логов для скрытой консоли в веб-интерфейсе
@@ -51,6 +55,10 @@ logging.getLogger("utm_service").addHandler(memory_logger)
 # Приложение FastAPI
 # ------------------------------------------------------------------------------
 STATIC_DIR = Path(__file__).parent / "static"
+AVATARS_DIR = get_avatars_dir()
+
+# Инициализируем базу данных пользователей и суперпользователя
+init_db()
 
 app = FastAPI(
     title=settings.APP_TITLE,
@@ -68,9 +76,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+if AVATARS_DIR.exists():
+    app.mount("/static/avatars", StaticFiles(directory=AVATARS_DIR), name="avatars")
+
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")
+app.include_router(history_router, prefix="/api/v1")
 app.include_router(memo_router, prefix="/api/v1")
 
 
@@ -85,12 +99,11 @@ async def serve_index():
 
 @app.get("/health", tags=["Служебные"])
 async def health_check():
-    """Проверка доступности сервиса и текущего статуса конфигурации."""
+    """Проверка доступности сервиса."""
     return {
         "status": "online",
         "app": settings.APP_TITLE,
         "version": settings.APP_VERSION,
-        "mock_mode": settings.MOCK_MODE,
     }
 
 
@@ -105,19 +118,3 @@ async def clear_system_logs():
     """Очищает историю системных логов."""
     memory_logger.clear()
     return {"status": "cleared"}
-
-
-@app.post("/api/v1/system/shutdown", tags=["Служебные"])
-async def shutdown_system():
-    """Завершает работу фонового процесса приложения."""
-    import os
-    import threading
-    import time
-
-    def kill_process():
-        time.sleep(0.4)
-        os._exit(0)
-
-    threading.Thread(target=kill_process, daemon=True).start()
-    return {"status": "shutting_down"}
-

@@ -1,4 +1,3 @@
-import io
 import os
 import sys
 import threading
@@ -6,14 +5,6 @@ import time
 import urllib.request
 import webbrowser
 import uvicorn
-
-# Защита от аварийного завершения при запуске без консоли (PyInstaller --noconsole)
-if sys.stdout is None:
-    sys.stdout = io.StringIO()
-if sys.stderr is None:
-    sys.stderr = io.StringIO()
-
-from app.main import app
 
 
 def is_already_running(port: int = 8000) -> bool:
@@ -29,21 +20,34 @@ def is_already_running(port: int = 8000) -> bool:
         return False
 
 
-def open_browser():
+def open_browser(url: str = "http://127.0.0.1:8000"):
     """Автоматически открывает интерфейс в браузере после старта сервера."""
     time.sleep(1.0)
-    webbrowser.open("http://127.0.0.1:8000")
+    try:
+        webbrowser.open(url)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":
-    # Если процесс уже работает в фоне — не плодим дубли и не ломаем порт,
-    # а просто мгновенно открываем вкладку браузера и выходим.
-    if is_already_running(8000):
-        webbrowser.open("http://127.0.0.1:8000")
+    port = int(os.environ.get("PORT", 8000))
+
+    # Если сервис уже запущен — просто открываем вкладку в браузере
+    if is_already_running(port):
+        print(f"\n[+] Сервис уже запущен! Открываем браузер: http://127.0.0.1:{port}\n")
+        try:
+            webbrowser.open(f"http://127.0.0.1:{port}")
+        except Exception:
+            pass
         sys.exit(0)
 
-    # Фоновое открытие браузера при первом холодном старте
-    threading.Thread(target=open_browser, daemon=True).start()
+    # При локальном запуске (на ПК) автоматически открываем браузер
+    threading.Thread(target=open_browser, args=(f"http://127.0.0.1:{port}",), daemon=True).start()
 
-    # Запуск сервера
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+    print(f"\n=======================================================")
+    print(f"  Сервис vpn_searcher успешно запущен!")
+    print(f"  Адрес в браузере: http://127.0.0.1:{port} (или http://localhost:{port})")
+    print(f"=======================================================\n")
+
+    # host="0.0.0.0" позволяет подключаться как локально, так и с других ПК в сети / Docker
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, log_level="info")
