@@ -56,9 +56,12 @@ RPC_GET_DOCUMENT = 0x4620        # Генерация печатной форм�
 WHAT_ID_USER_ID = 1
 WHAT_ID_LOGIN = 2
 WHAT_ID_FULL_NAME = 5
+WHAT_ID_WORK_PHONE = 13          # Рабочий телефон абонента
 WHAT_ID_HOME_PHONE = 14          # Содержит MAC-адрес рабочего места
+WHAT_ID_ROOM = 22                # Номер кабинета / аудитории (flat_number)
 WHAT_ID_FLOOR = 24               # Содержит локальный IP-адрес рабочего места
 WHAT_ID_IP = 28                  # IP-адрес из связки услуг (VPN / IP-трафик)
+WHAT_ID_BUILDING = 41            # Номер корпуса
 WHAT_ID_MAC = 42                 # MAC-адрес из связки услуг
 
 # Критерии сравнения (criteria_id)
@@ -631,6 +634,147 @@ class UrfaMemoService(BaseMemoService):
         finally:
             conn.close()
 
+    def _sync_unified_search(
+        self,
+        query: str
+    ) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
+        """
+        Синхронный универсальный поиск в ядре биллинга:
+        - Аудитория с корпусом ('1-709', '2-709'): поиск по кабинету и фильтрация по корпусу.
+        - IP-адрес ('10.100.0.144'): поиск по связкам услуг и локальному IP.
+        - MAC-адрес ('77-D0', 'FF-4C', 'CD:12'): поиск в контактном телефоне и связках услуг.
+        - Ф.И.О., логин абонента, номер аудитории или рабочий телефон.
+        """
+        q = query.strip()
+        if not q:
+            return None
+
+        conn = UrfaConnection(
+            host=self.host,
+            port=self.port,
+            login=self.login,
+            password=self.password,
+            timeout=self.timeout,
+        )
+
+        try:
+            conn.connect()
+            logger.info(f"Подключение к биллингу установлено: единый поиск query='{q}'")
+
+            candidates: list[UserCandidateSchema] = []
+
+            # 1. Поиск по формату аудитории с корпусом ('1-709', '2-709', '9-444')
+            room_match = re.match(r"^(\d+)\s*[-/\\#\s]\s*([a-zA-Zа-яА-Я0-9]+)$", q)
+            if room_match:
+                building_str = room_match.group(1).strip()
+                room_str = room_match.group(2).strip()
+
+                # Ищем по номеру кабинета (WHAT_ID_ROOM)
+                res = conn.search_users_new(WHAT_ID_ROOM, CRITERIA_EQ, room_str)
+                found = self._parse_candidates_from_search(res)
+                if not found:
+                    res = conn.search_users_new(WHAT_ID_ROOM, CRITERIA_LIKE, room_str)
+                    found = self._parse_candidates_from_search(res)
+
+                # Фильтруем по номеру корпуса
+                filtered = [
+                    c for c in found
+                    if c.building and (c.building.strip() == building_str or c.building.strip().startswith(building_str))
+                ]
+
+                # Запасной вариант: если аудитория сохранена единой строкой (например '1-709')
+                if not filtered:
+                    res_combo = conn.search_users_new(WHAT_ID_ROOM, CRITERIA_LIKE, f"{building_str}-{room_str}")
+                    filtered = self._parse_candidates_from_search(res_combo)
+
+                candidates = filtered
+
+            # 2. Поиск по IP-адресу
+            elif re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", q):
+                res = conn.search_users_new(WHAT_ID_IP, CRITERIA_EQ, q)
+                candidates = self._parse_candidates_from_search(res)
+                if not candidates:
+                    res = conn.search_users_new(WHAT_ID_FLOOR, CRITERIA_EQ, q)
+                    candidates = self._parse_candidates_from_search(res)
+                if not candidates:
+                    res = conn.search_users_new(WHAT_ID_FLOOR, CRITERIA_LIKE, q)
+                    candidates = self._parse_candidates_from_search(res)
+
+            # 3. Поиск по MAC-адресу или суффиксу/фрагменту MAC (например '77-D0', 'FF-4C')
+            elif bool(re.search(r"[-:]", q)) or (len(re.sub(r"[^0-9A-Za-z]", "", q)) >= 4 and all(c in "0123456789ABCDEFabcdef" for c in re.sub(r"[^0-9A-Za-z]", "", q)) and not q.isdigit()):
+                clean_mac = re.sub(r"[^0-9A-Za-z]", "", q).upper()
+                mac_hyphen = "-".join(clean_mac[i:i + 2] for i in range(0, len(clean_mac), 2))
+                mac_colon = ":".join(clean_mac[i:i + 2] for i in range(0, len(clean_mac), 2))
+
+                # Поиск в поле контактного телефона
+                res = conn.search_users_new(WHAT_ID_HOME_PHONE, CRITERIA_LIKE, mac_hyphen)
+                candidates = self._parse_candidates_from_search(res)
+                if not candidates and mac_colon != mac_hyphen:
+                    res = conn.search_users_new(WHAT_ID_HOME_PHONE, CRITERIA_LIKE, mac_colon)
+                    candidates = self._parse_candidates_from_search(res)
+                if not candidates:
+                    res = conn.search_users_new(WHAT_ID_HOME_PHONE, CRITERIA_LIKE, q)
+                    candidates = self._parse_candidates_from_search(res)
+
+                # Поиск в поле связок услуг MAC
+                if not candidates and len(clean_mac) >= 4:
+                    res = conn.search_users_new(WHAT_ID_MAC, CRITERIA_LIKE, mac_colon)
+                    candidates = self._parse_candidates_from_search(res)
+                if not candidates and len(clean_mac) >= 4:
+                    res = conn.search_users_new(WHAT_ID_MAC, CRITERIA_LIKE, mac_hyphen)
+                    candidates = self._parse_candidates_from_search(res)
+
+            # 4. Поиск по Ф.И.О., логину абонента или номеру кабинета/телефона
+            else:
+                # 4.1. Поиск по Ф.И.О.
+                res = conn.search_users_new(WHAT_ID_FULL_NAME, CRITERIA_LIKE, q)
+                candidates.extend(self._parse_candidates_from_search(res))
+
+                # 4.2. Поиск по логину абонента
+                if not candidates or (" " not in q and len(q) <= 30):
+                    res = conn.search_users_new(WHAT_ID_LOGIN, CRITERIA_EQ, q)
+                    candidates.extend(self._parse_candidates_from_search(res))
+                    if not candidates:
+                        res = conn.search_users_new(WHAT_ID_LOGIN, CRITERIA_LIKE, q)
+                        candidates.extend(self._parse_candidates_from_search(res))
+
+                # 4.3. Поиск по номеру кабинета (если запрос числовой, например '709' или '324')
+                if not candidates and re.match(r"^\d+[a-zA-Zа-яА-Я]?$", q):
+                    res = conn.search_users_new(WHAT_ID_ROOM, CRITERIA_EQ, q)
+                    candidates.extend(self._parse_candidates_from_search(res))
+                    if not candidates:
+                        res = conn.search_users_new(WHAT_ID_ROOM, CRITERIA_LIKE, q)
+                        candidates.extend(self._parse_candidates_from_search(res))
+
+                # 4.4. Поиск по рабочему телефону
+                if not candidates and re.match(r"^[\d-]+$", q):
+                    res = conn.search_users_new(WHAT_ID_WORK_PHONE, CRITERIA_LIKE, q)
+                    candidates.extend(self._parse_candidates_from_search(res))
+
+            # Дедупликация кандидатов по user_id
+            seen_ids = set()
+            unique_candidates: list[UserCandidateSchema] = []
+            for c in candidates:
+                if c.user_id not in seen_ids:
+                    seen_ids.add(c.user_id)
+                    unique_candidates.append(c)
+
+            if not unique_candidates:
+                logger.info(f"Абонент по единому запросу '{q}' не найден")
+                return None
+
+            if len(unique_candidates) > 1:
+                logger.info(f"Найдено {len(unique_candidates)} кандидатов по запросу '{q}'")
+                return UserCandidatesResponseSchema(candidates=unique_candidates)
+
+            # Ровно один абонент — сразу формируем и отдаем полную памятку
+            single_user_id = unique_candidates[0].user_id
+            logger.info(f"Найден единственный абонент ID={single_user_id}, загрузка памятки...")
+            return self._build_memo_response(conn, single_user_id)
+
+        finally:
+            conn.close()
+
     def _sync_get_by_id(self, user_id: int) -> MemoResponseSchema | None:
         """Синхронная загрузка памятки по известному ID пользователя."""
         conn = UrfaConnection(
@@ -655,6 +799,15 @@ class UrfaMemoService(BaseMemoService):
             raise ConnectionError(f"Сервер биллинга ({self.host}:{self.port}) не отвечает (таймаут сети).")
         except (OSError, ConnectionRefusedError, PermissionError) as e:
             logger.error(f"Сетевая ошибка при взаимодействии с сервером биллинга -> {e}")
+            raise ConnectionError(f"Ошибка связи с сервером биллинга: {e}")
+
+    async def search(self, query: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
+        """Универсальный поиск памятки или списка кандидатов по единой строке запроса."""
+        try:
+            return await asyncio.to_thread(self._sync_unified_search, query.strip())
+        except (socket.timeout, TimeoutError):
+            raise ConnectionError(f"Сервер биллинга ({self.host}:{self.port}) не отвечает (таймаут сети).")
+        except (OSError, ConnectionRefusedError, PermissionError) as e:
             raise ConnectionError(f"Ошибка связи с сервером биллинга: {e}")
 
     async def search_by_name(self, name: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:

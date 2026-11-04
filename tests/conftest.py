@@ -1,6 +1,9 @@
-import logging
 from typing import Any
+import pytest
+from fastapi.testclient import TestClient
 
+from app.api.v1.memo import get_memo_service
+from app.main import app
 from app.schemas.memo import (
     EmployeeInfoSchema,
     MemoResponseSchema,
@@ -13,16 +16,14 @@ from app.schemas.memo import (
 )
 from app.services.base import BaseMemoService
 
-logger = logging.getLogger("utm_service")
 
-
-class MockMemoService(BaseMemoService):
+class FakeMemoService(BaseMemoService):
     """
-    Тестовый сервис с изолированными данными сотрудников в оперативной памяти.
-    Используется для локальной разработки, отладки интерфейса и юнит-тестирования.
+    Тестовый двойник сервиса поиска для изолированного запуска юнит-тестов
+    без подключения к корпоративному серверу биллинга.
     """
 
-    _MOCK_USERS: list[dict[str, Any]] = [
+    _TEST_USERS: list[dict[str, Any]] = [
         {
             "user_id": 1,
             "memo": MemoResponseSchema(
@@ -88,9 +89,9 @@ class MockMemoService(BaseMemoService):
                     vpn_auth_method="MS-CHAP v2",
                     vpn_accounts=[
                         VpnAccountSchema(
-                            login="vpn_petrov",
-                            password="VpnSecretPass2",
-                            vpn_ip="10.10.15.99",
+                            login="petrov",
+                            password="VpnPetrovKey2026",
+                            vpn_ip="10.10.15.10",
                             host_ip="10.100.1.50",
                         )
                     ],
@@ -101,36 +102,29 @@ class MockMemoService(BaseMemoService):
             "user_id": 3,
             "memo": MemoResponseSchema(
                 employee=EmployeeInfoSchema(
-                    full_name="Демина Виктория Юрьевна",
-                    position="Специалист по документообороту",
+                    full_name="Демина Анна Павловна",
+                    position="Бухгалтер",
                     building="1",
-                    room="110",
-                    phone="27-19",
-                    tariff="100Гб",
+                    room="205",
+                    phone="45-12",
+                    tariff="Стандартный",
                 ),
                 network=NetworkInfoSchema(
-                    inventory_number="01340101",
-                    ip_addresses=["10.224.0.136"],
-                    mac_addresses=["A0-36-BC-11-22-33"],
+                    inventory_number="01340112",
+                    ip_addresses=["10.100.2.15"],
+                    mac_addresses=["A8-66-7F-89-99-EE"],
                 ),
                 statistics=StatAccessSchema(
                     stat_server="utmweb.corp.local",
                     stat_login="vdemina",
-                    stat_password="StatPassDemina1",
+                    stat_password="DeminaPass2026",
                 ),
                 vpn=VpnSettingsSchema(
                     vpn_server="vpn.corp.local",
                     vpn_type="PPTP",
                     vpn_encryption="без шифрования",
                     vpn_auth_method="MS-CHAP v2",
-                    vpn_accounts=[
-                        VpnAccountSchema(
-                            login="vdemina",
-                            password="VpnPassDemina1",
-                            vpn_ip="172.22.10.15",
-                            host_ip="10.224.0.136",
-                        )
-                    ],
+                    vpn_accounts=[],
                 ),
             ),
         },
@@ -139,21 +133,21 @@ class MockMemoService(BaseMemoService):
             "memo": MemoResponseSchema(
                 employee=EmployeeInfoSchema(
                     full_name="Демин Вячеслав Юрьевич",
-                    position="Ведущий инженер",
+                    position="Ведущий специалист",
                     building="2",
                     room="709",
-                    phone="27-64",
-                    tariff="100Гб",
+                    phone="27-65",
+                    tariff="Служебный",
                 ),
                 network=NetworkInfoSchema(
-                    inventory_number="01340102",
-                    ip_addresses=["10.146.0.104"],
-                    mac_addresses=["B4-2E-99-44-55-66"],
+                    inventory_number="01340120",
+                    ip_addresses=["10.100.2.80"],
+                    mac_addresses=["BC-EE-7B-11-22-33"],
                 ),
                 statistics=StatAccessSchema(
                     stat_server="utmweb.corp.local",
                     stat_login="vdemin",
-                    stat_password="StatPassDemin2",
+                    stat_password="DeminPassword789",
                 ),
                 vpn=VpnSettingsSchema(
                     vpn_server="vpn.corp.local",
@@ -162,23 +156,16 @@ class MockMemoService(BaseMemoService):
                     vpn_auth_method="MS-CHAP v2",
                     vpn_accounts=[
                         VpnAccountSchema(
-                            login="vdemin",
-                            password="094e537c",
-                            vpn_ip="172.22.6.122",
-                            host_ip="10.146.0.104",
+                            login="vdemin_vpn",
+                            password="VpnDeminSecure1",
+                            vpn_ip="10.10.15.77",
+                            host_ip="10.100.2.80",
                         )
                     ],
                 ),
             ),
         },
     ]
-
-    async def get_by_user_id(self, user_id: int) -> MemoResponseSchema | None:
-        """Получение памятки по ID пользователя."""
-        for u in self._MOCK_USERS:
-            if u["user_id"] == user_id:
-                return u["memo"]
-        return None
 
     def _format_result(self, matched: list[dict[str, Any]]) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
         if not matched:
@@ -199,35 +186,97 @@ class MockMemoService(BaseMemoService):
         ]
         return UserCandidatesResponseSchema(candidates=candidates)
 
-    async def search_by_name(self, name: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
-        """Поиск по подстроке в Ф.И.О."""
-        query = name.strip().lower()
-        matched = [
-            u for u in self._MOCK_USERS
-            if query in u["memo"].employee.full_name.lower() or query in u["memo"].statistics.stat_login.lower()
-        ]
-        return self._format_result(matched)
+    async def get_by_user_id(self, user_id: int) -> MemoResponseSchema | None:
+        for u in self._TEST_USERS:
+            if u["user_id"] == user_id:
+                return u["memo"]
+        return None
 
-    async def search_by_ip(self, ip: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
-        """Поиск по IP-адресу."""
-        query = ip.strip()
-        matched = []
-        for u in self._MOCK_USERS:
+    async def search(self, query: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
+        raw = query.strip()
+        if not raw:
+            return None
+
+        # 1. Формат корпус-аудитория (например, '2-709', '1-324')
+        if "-" in raw and any(char.isdigit() for char in raw):
+            parts = raw.split("-", 1)
+            bldg, rm = parts[0].strip(), parts[1].strip()
+            matched = [
+                u for u in self._TEST_USERS
+                if u["memo"].employee.building.lower() == bldg.lower()
+                and u["memo"].employee.room.lower() == rm.lower()
+            ]
+            if matched:
+                return self._format_result(matched)
+
+        # 2. Номер аудитории/кабинета без корпуса ('709')
+        if raw.isdigit():
+            matched = [
+                u for u in self._TEST_USERS
+                if u["memo"].employee.room.lower() == raw.lower()
+            ]
+            if matched:
+                return self._format_result(matched)
+
+        # 3. MAC-адрес или его фрагмент/суффикс ('77-D0', 'CD-12', 'F0:22:1D:33:77:D0')
+        clean_mac = raw.upper().replace(":", "-")
+        matched = [
+            u for u in self._TEST_USERS
+            if any(clean_mac in m.upper().replace(":", "-") for m in u["memo"].network.mac_addresses)
+        ]
+        if matched:
+            return self._format_result(matched)
+
+        # 4. IP-адрес
+        ip_matched = []
+        for u in self._TEST_USERS:
             memo = u["memo"]
-            if query in memo.network.ip_addresses:
-                matched.append(u)
+            if raw in memo.network.ip_addresses:
+                ip_matched.append(u)
                 continue
             for acc in memo.vpn.vpn_accounts:
-                if query == acc.vpn_ip or query == acc.host_ip:
-                    matched.append(u)
+                if raw == acc.vpn_ip or raw == acc.host_ip:
+                    ip_matched.append(u)
                     break
-        return self._format_result(matched)
+        if ip_matched:
+            return self._format_result(ip_matched)
 
-    async def search_by_mac(self, mac: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
-        """Поиск по MAC-адресу."""
-        clean_mac = mac.strip().upper().replace(":", "-")
+        # 5. ФИО или логин
+        q_lower = raw.lower()
         matched = [
-            u for u in self._MOCK_USERS
-            if clean_mac in u["memo"].network.mac_addresses
+            u for u in self._TEST_USERS
+            if q_lower in u["memo"].employee.full_name.lower() or q_lower in u["memo"].statistics.stat_login.lower()
         ]
         return self._format_result(matched)
+
+    async def search_by_name(self, name: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
+        return await self.search(name)
+
+    async def search_by_ip(self, ip: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
+        return await self.search(ip)
+
+    async def search_by_mac(self, mac: str) -> MemoResponseSchema | UserCandidatesResponseSchema | None:
+        return await self.search(mac)
+
+
+@pytest.fixture
+def fake_service():
+    return FakeMemoService()
+
+
+@pytest.fixture
+def client(fake_service):
+    app.dependency_overrides[get_memo_service] = lambda: fake_service
+    with TestClient(app) as test_client:
+        yield test_client
+    app.dependency_overrides.pop(get_memo_service, None)
+
+
+@pytest.fixture
+def auth_headers(client):
+    resp = client.post("/api/v1/auth/login", json={
+        "username": "admin",
+        "password": "admin",
+    })
+    token = resp.json()["token"]
+    return {"Authorization": f"Bearer {token}"}
