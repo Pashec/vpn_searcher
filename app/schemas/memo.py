@@ -30,7 +30,7 @@ class VpnAccountSchema(BaseModel):
 
 class VpnSettingsSchema(BaseModel):
     """Сетевые параметры VPN-подключения корпоративной сети."""
-    vpn_server: str = Field(default="vpn.corp.local", description="DNS-имя или IP-адрес VPN-сервера")
+    vpn_server: str = Field(default="vpn.dstu.local", description="DNS-имя или IP-адрес VPN-сервера")
     vpn_type: str = Field(default="PPTP", description="Тип тоннеля")
     vpn_encryption: str = Field(default="без шифрования", description="Требования к шифрованию")
     vpn_auth_method: str = Field(default="MS-CHAP v2", description="Метод проверки подлинности")

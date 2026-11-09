@@ -525,13 +525,13 @@ class UrfaMemoService(BaseMemoService):
         )
 
         statistics = StatAccessSchema(
-            stat_server="utmweb.corp.local",
+            stat_server=settings.STAT_SERVER,
             stat_login=stat_login,
             stat_password=stat_password,
         )
 
         vpn = VpnSettingsSchema(
-            vpn_server="vpn.corp.local",
+            vpn_server=settings.VPN_SERVER,
             vpn_type="PPTP",
             vpn_encryption="без шифрования",
             vpn_auth_method="MS-CHAP v2",

@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     UTM_LOGIN: str = "staff"
     UTM_PASSWORD: str = ""
 
+    # Корпоративные серверы
+    VPN_SERVER: str = "vpn.dstu.local"
+    STAT_SERVER: str = "utmweb.corp.local"
+
     # Метаданные сервиса
     APP_TITLE: str = "Pashec Inc. vpn_searcher"
     APP_VERSION: str = "v1.0.0"

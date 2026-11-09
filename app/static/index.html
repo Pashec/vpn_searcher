@@ -609,20 +609,229 @@
     }
 
     .copy-pill {
-      background: transparent;
-      border: none;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--text-muted);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      padding: 3px 6px;
-      border-radius: 4px;
+      justify-content: center;
+      padding: 4px 7px;
+      border-radius: 6px;
       transition: var(--transition-apple);
+      flex-shrink: 0;
     }
 
     .copy-pill:hover {
       color: var(--accent-blue);
-      background: rgba(10, 132, 255, 0.12);
+      background: rgba(10, 132, 255, 0.15);
+      border-color: rgba(10, 132, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    .copy-pill:active {
+      transform: scale(0.95);
+    }
+
+    .copy-pill.copied {
+      color: #30d158 !important;
+      background: rgba(48, 209, 88, 0.2) !important;
+      border-color: rgba(48, 209, 88, 0.4) !important;
+    }
+
+    /* ==========================================================================
+       Main Credentials Card (Important Fields Only)
+       ========================================================================== */
+    .main-credentials-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: var(--card-blur);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5);
+      transition: var(--transition-apple);
+    }
+
+    .main-credentials-card:hover {
+      border-color: var(--card-border-hover);
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.85rem;
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .section-title-badge {
+      font-size: 0.72rem;
+      background: rgba(10, 132, 255, 0.15);
+      color: #70b4ff;
+      border: 1px solid rgba(10, 132, 255, 0.3);
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 500;
+    }
+
+    .credentials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .cred-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      transition: var(--transition-apple);
+    }
+
+    .cred-item:hover {
+      background: rgba(0, 0, 0, 0.45);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .cred-item.highlight {
+      background: rgba(10, 132, 255, 0.08);
+      border-color: rgba(10, 132, 255, 0.28);
+    }
+
+    .cred-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .cred-value-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .cred-val-text {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: #ffffff;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    .cred-item.highlight .cred-val-text {
+      color: #70b4ff;
+      font-weight: 600;
+    }
+
+    .account-block {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .account-block:first-child {
+      padding-top: 0;
+      border-top: none;
+    }
+
+    .account-header {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ==========================================================================
+       Collapsible Details Accordion
+       ========================================================================== */
+    .collapsible-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      width: 100%;
+    }
+
+    .collapse-toggle-btn {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1.3rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition-apple);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .collapse-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .collapse-toggle-btn.open {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(10, 132, 255, 0.3);
+      color: var(--text-primary);
+    }
+
+    .collapse-toggle-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .collapse-icon {
+      transition: transform 0.25s ease;
+      stroke: var(--accent-blue);
+    }
+
+    .collapse-toggle-btn.open .collapse-icon {
+      transform: rotate(180deg);
+    }
+
+    .collapse-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .collapsible-content {
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* VPN Accounts Table */
@@ -1048,33 +1257,156 @@
       color: #e5e5ea;
     }
 
-    /* Print */
+    /* ==========================================================================
+       Print Stylesheet (Strict Single Page A4 - Official Memo)
+       ========================================================================== */
+    @media screen {
+      .print-sheet {
+        display: none !important;
+      }
+    }
+
     @media print {
-      body {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+      }
+
+      html, body {
         background: #ffffff !important;
         color: #000000 !important;
         padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
       }
-      #ambient-canvas, .bg-grid, .top-navbar, .search-panel, .hero-actions, .copy-pill, .console-overlay, #candidates-view {
+
+      /* Hide all regular interface elements during print */
+      body > * {
         display: none !important;
       }
-      .app-wrapper {
+
+      .print-sheet {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 100% !important;
         max-width: 100% !important;
-        gap: 1rem !important;
-      }
-      .hero-card, .bento-card {
+        margin: 0 !important;
+        padding: 0 !important;
         background: #ffffff !important;
-        border: 1px solid #cccccc !important;
-        box-shadow: none !important;
         color: #000000 !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+        font-size: 10pt !important;
+        line-height: 1.35 !important;
+        page-break-inside: avoid !important;
       }
-      .employee-name {
-        color: #000000 !important;
+
+      .print-header {
+        text-align: center;
+        border-bottom: 2px solid #000000;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
       }
-      .mono-badge {
-        background: #f4f4f4 !important;
-        color: #000000 !important;
-        border-color: #dddddd !important;
+
+      .print-title {
+        font-size: 13pt;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #000000;
+      }
+
+      .print-subtitle {
+        font-size: 8.5pt;
+        color: #444444;
+        margin: 0;
+      }
+
+      .print-section {
+        margin-bottom: 10px;
+      }
+
+      .print-sec-title {
+        font-size: 9.5pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #222222;
+        border-bottom: 1px solid #cccccc;
+        padding-bottom: 3px;
+        margin: 0 0 6px 0;
+      }
+
+      .print-info-grid {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 6px;
+        font-size: 9.5pt;
+      }
+
+      .print-info-grid td {
+        padding: 3px 5px;
+        vertical-align: top;
+      }
+
+      .print-info-label {
+        font-weight: 600;
+        color: #333333;
+        width: 20%;
+      }
+
+      .print-info-val {
+        color: #000000;
+        width: 30%;
+      }
+
+      .print-data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+        margin-top: 4px;
+      }
+
+      .print-data-table th, 
+      .print-data-table td {
+        border: 1px solid #333333;
+        padding: 5px 7px;
+        text-align: left;
+      }
+
+      .print-data-table th {
+        background: #f0f0f0 !important;
+        font-weight: 700;
+        color: #000000;
+        font-size: 8.5pt;
+        text-transform: uppercase;
+      }
+
+      .print-mono {
+        font-family: "Courier New", Courier, monospace !important;
+        font-weight: 600;
+      }
+
+      .print-notice {
+        margin-top: 10px;
+        padding: 6px 10px;
+        border-left: 3px solid #666666;
+        background: #f9f9f9 !important;
+        font-size: 8pt;
+        color: #333333;
+        line-height: 1.3;
+      }
+
+      .print-signatures {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        font-size: 9pt;
+        padding-top: 8px;
+      }
+
+      .print-sig-col {
+        width: 48%;
       }
     }
 
@@ -1759,119 +2091,132 @@
         </div>
       </section>
 
-      <!-- Bento Grid Cards -->
-      <div class="bento-grid">
-        
-        <!-- Network Settings -->
-        <article class="bento-card">
-          <div class="card-header">
-            <svg class="card-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
-            Сетевые реквизиты ПК
-          </div>
-
-          <div class="data-row">
-            <span class="data-label">Инвентарный номер</span>
-            <div class="data-value">
-              <span id="net-inventory" class="mono-badge">-</span>
-              <button class="copy-pill" onclick="copyValue('net-inventory')" title="Копировать">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="data-row">
-            <span class="data-label">Локальные IP-адреса</span>
-            <div id="net-ips" style="display: flex; flex-direction: column; gap: 0.4rem;"></div>
-          </div>
-
-          <div class="data-row">
-            <span class="data-label">MAC-адреса сетевых плат</span>
-            <div id="net-macs" style="display: flex; flex-direction: column; gap: 0.4rem;"></div>
-          </div>
-        </article>
-
-        <!-- Web Statistics Access -->
-        <article class="bento-card">
-          <div class="card-header">
-            <svg class="card-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-            Личный кабинет статистики
-          </div>
-
-          <div class="data-row">
-            <span class="data-label">Сервер статистики</span>
-            <div class="data-value">
-              <span id="stat-server" class="mono-badge">utmweb.corp.local</span>
-              <button class="copy-pill" onclick="copyValue('stat-server')" title="Копировать">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="data-row">
-            <span class="data-label">Логин абонента</span>
-            <div class="data-value">
-              <span id="stat-login" class="mono-badge">-</span>
-              <button class="copy-pill" onclick="copyValue('stat-login')" title="Копировать">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </button>
-            </div>
-          </div>
-
-          <div class="data-row">
-            <span class="data-label">Пароль абонента</span>
-            <div class="data-value">
-              <span id="stat-password" class="mono-badge">-</span>
-              <button class="copy-pill" onclick="copyValue('stat-password')" title="Копировать пароль">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              </button>
-            </div>
-          </div>
-        </article>
-
-        <!-- VPN Settings (Full Width) -->
-        <article class="bento-card full-width">
-          <div class="card-header">
+      <!-- Main Credentials Card (Important Fields Only) -->
+      <section class="main-credentials-card">
+        <div class="section-title-wrap">
+          <div class="section-title">
             <svg class="card-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            Параметры корпоративного VPN
+            Реквизиты подключения к сети и VPN
           </div>
+          <span class="section-title-badge">Основные данные</span>
+        </div>
+        
+        <div id="main-credentials-container">
+          <!-- Populated dynamically by renderMemo(): VPN server, login, password, IP, MAC -->
+        </div>
+      </section>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
-            <div class="data-row">
-              <span class="data-label">VPN Сервер</span>
-              <span id="vpn-server" class="mono-badge">vpn.corp.local</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Тип тоннеля</span>
-              <span id="vpn-type" class="mono-badge">PPTP</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Шифрование</span>
-              <span id="vpn-encryption" class="mono-badge">без шифрования</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Метод проверки</span>
-              <span id="vpn-auth" class="mono-badge">MS-CHAP v2</span>
-            </div>
+      <!-- Collapsible Section: Secondary Details -->
+      <div class="collapsible-wrapper">
+        <button class="collapse-toggle-btn" id="details-toggle-btn" onclick="toggleDetails()" type="button" aria-expanded="false">
+          <span class="collapse-toggle-left">
+            <svg class="collapse-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            <span>Дополнительные параметры и служебные настройки</span>
+          </span>
+          <span class="collapse-hint">Инвентарный №, LAN IP, статистика, протокол</span>
+        </button>
+
+        <div class="collapsible-content" id="details-collapsible-body" style="display: none;">
+          <div class="bento-grid">
+            <!-- Network Settings -->
+            <article class="bento-card">
+              <div class="card-header">
+                <svg class="card-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                Сетевые реквизиты ПК
+              </div>
+
+              <div class="data-row">
+                <span class="data-label">Инвентарный номер</span>
+                <div class="data-value">
+                  <span id="net-inventory" class="mono-badge">-</span>
+                  <button class="copy-pill" onclick="copyValue('net-inventory', this)" title="Копировать">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="data-row">
+                <span class="data-label">Локальные IP-адреса</span>
+                <div id="net-ips" style="display: flex; flex-direction: column; gap: 0.4rem;"></div>
+              </div>
+
+              <div class="data-row">
+                <span class="data-label">MAC-адреса сетевых плат</span>
+                <div id="net-macs" style="display: flex; flex-direction: column; gap: 0.4rem;"></div>
+              </div>
+            </article>
+
+            <!-- Web Statistics Access -->
+            <article class="bento-card">
+              <div class="card-header">
+                <svg class="card-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                Личный кабинет статистики
+              </div>
+
+              <div class="data-row">
+                <span class="data-label">Сервер статистики</span>
+                <div class="data-value">
+                  <span id="stat-server" class="mono-badge">utmweb.corp.local</span>
+                  <button class="copy-pill" onclick="copyValue('stat-server', this)" title="Копировать">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="data-row">
+                <span class="data-label">Логин абонента</span>
+                <div class="data-value">
+                  <span id="stat-login" class="mono-badge">-</span>
+                  <button class="copy-pill" onclick="copyValue('stat-login', this)" title="Копировать">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="data-row">
+                <span class="data-label">Пароль абонента</span>
+                <div class="data-value">
+                  <span id="stat-password" class="mono-badge">-</span>
+                  <button class="copy-pill" onclick="copyValue('stat-password', this)" title="Копировать пароль">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <!-- Technical VPN Settings -->
+            <article class="bento-card full-width">
+              <div class="card-header">
+                <svg class="card-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Технические параметры VPN протокола
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                <div class="data-row">
+                  <span class="data-label">VPN Сервер</span>
+                  <div class="data-value">
+                    <span id="vpn-server" class="mono-badge">vpn.dstu.local</span>
+                    <button class="copy-pill" onclick="copyValue('vpn-server', this)" title="Копировать">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Тип тоннеля</span>
+                  <span id="vpn-type" class="mono-badge">PPTP</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Шифрование</span>
+                  <span id="vpn-encryption" class="mono-badge">без шифрования</span>
+                </div>
+                <div class="data-row">
+                  <span class="data-label">Метод проверки</span>
+                  <span id="vpn-auth" class="mono-badge">MS-CHAP v2</span>
+                </div>
+              </div>
+            </article>
           </div>
-
-          <div style="margin-top: 0.5rem;">
-            <div class="data-label" style="margin-bottom: 0.6rem;">Привязанные учетные записи VPN</div>
-            <div style="overflow-x: auto;">
-              <table class="vpn-table">
-                <thead>
-                  <tr>
-                    <th>Логин VPN</th>
-                    <th>Пароль VPN</th>
-                    <th>Выделенный IP</th>
-                    <th>Привязка к хосту</th>
-                  </tr>
-                </thead>
-                <tbody id="vpn-accounts-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </article>
-
+        </div>
       </div>
     </main>
 
@@ -2061,6 +2406,71 @@
             <button type="submit" class="btn-terminal" style="align-self: flex-start; padding: 0.45rem 1rem;">Сменить пароль</button>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Printable A4 Sheet (Only Important Data, Single Page) -->
+  <div id="print-sheet" class="print-sheet">
+    <div class="print-header">
+      <h1 class="print-title">Памятка пользователя корпоративной сети</h1>
+      <p class="print-subtitle">Реквизиты подключения рабочего места и параметры VPN | <span id="print-current-date"></span></p>
+    </div>
+
+    <div class="print-section">
+      <h2 class="print-sec-title">Сведения о сотруднике</h2>
+      <table class="print-info-grid">
+        <tr>
+          <td class="print-info-label">Ф.И.О.:</td>
+          <td class="print-info-val"><strong id="print-name">-</strong></td>
+          <td class="print-info-label">Корпус:</td>
+          <td class="print-info-val" id="print-building">-</td>
+        </tr>
+        <tr>
+          <td class="print-info-label">Должность:</td>
+          <td class="print-info-val" id="print-position">-</td>
+          <td class="print-info-label">Кабинет:</td>
+          <td class="print-info-val" id="print-room">-</td>
+        </tr>
+        <tr>
+          <td class="print-info-label">Телефон:</td>
+          <td class="print-info-val" id="print-phone">-</td>
+          <td class="print-info-label">MAC-адрес ПК:</td>
+          <td class="print-info-val print-mono" id="print-mac">-</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="print-section">
+      <h2 class="print-sec-title">Параметры подключения к VPN</h2>
+      <table class="print-data-table">
+        <thead>
+          <tr>
+            <th>VPN Сервер</th>
+            <th>Логин VPN</th>
+            <th>Пароль VPN</th>
+            <th>Выделенный IP</th>
+            <th>Привязка к хосту</th>
+          </tr>
+        </thead>
+        <tbody id="print-vpn-rows">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="print-notice">
+      <strong>Внимание:</strong> Настоящая памятка содержит конфиденциальные учетные данные доступа. Храните её в безопасном месте и не передавайте пароль третьим лицам.
+    </div>
+
+    <div class="print-signatures">
+      <div class="print-sig-col">
+        С памяткой ознакомлен:<br><br>
+        ___________________ / <span id="print-sig-emp">-</span> /
+      </div>
+      <div class="print-sig-col" style="text-align: right;">
+        Настройку произвел:<br><br>
+        ___________________ / ___________________ /
       </div>
     </div>
   </div>
@@ -2486,6 +2896,22 @@
     // ==========================================================================
     // Render Memo Data to UI Cards
     // ==========================================================================
+    function toggleDetails() {
+      const content = document.getElementById('details-collapsible-body');
+      const btn = document.getElementById('details-toggle-btn');
+      if (!content || !btn) return;
+      const isHidden = content.style.display === 'none' || !content.style.display;
+      if (isHidden) {
+        content.style.display = 'block';
+        btn.setAttribute('aria-expanded', 'true');
+        btn.classList.add('open');
+      } else {
+        content.style.display = 'none';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.classList.remove('open');
+      }
+    }
+
     function renderMemo(data) {
       const emp = data.employee;
       const net = data.network;
@@ -2501,67 +2927,214 @@
       document.getElementById('avatar-initials').textContent = initials || 'УТ';
 
       // Employee Profile
-      document.getElementById('emp-name').textContent = emp.full_name;
-      document.getElementById('emp-position').textContent = emp.position;
-      document.getElementById('emp-location').textContent = `Корпус ${emp.building}, каб. ${emp.room}`;
-      document.getElementById('emp-phone').textContent = `тел. ${emp.phone}`;
-      document.getElementById('emp-tariff').textContent = emp.tariff;
+      document.getElementById('emp-name').textContent = emp.full_name || 'Не указано';
+      document.getElementById('emp-position').textContent = emp.position || 'Сотрудник';
+      document.getElementById('emp-location').textContent = `Корпус ${emp.building || '-'}, каб. ${emp.room || '-'}`;
+      document.getElementById('emp-phone').textContent = emp.phone ? `тел. ${emp.phone}` : 'тел. не указан';
+      document.getElementById('emp-tariff').textContent = emp.tariff || 'Безлимитный';
 
-      // Network Parameters
+      // Primary MAC address to show
+      const primaryMac = (net.mac_addresses && net.mac_addresses.length)
+        ? net.mac_addresses[0]
+        : ((vpn.vpn_accounts && vpn.vpn_accounts.length && vpn.vpn_accounts[0].host_ip) ? vpn.vpn_accounts[0].host_ip : 'Не указан');
+
+      const vpnServerName = vpn.vpn_server || 'vpn.dstu.local';
+
+      // 1. Populate Main Credentials Card (Important Fields)
+      const mainCredContainer = document.getElementById('main-credentials-container');
+      if (!vpn.vpn_accounts || !vpn.vpn_accounts.length) {
+        mainCredContainer.innerHTML = `
+          <div class="credentials-grid">
+            <div class="cred-item">
+              <span class="cred-label">VPN Сервер</span>
+              <div class="cred-value-row">
+                <span class="cred-val-text">${escapeHtml(vpnServerName)}</span>
+                <button class="copy-pill" onclick="copyDirect('${escapeHtml(vpnServerName)}', this)" title="Копировать сервер">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+            </div>
+            <div class="cred-item">
+              <span class="cred-label">Логин абонента</span>
+              <div class="cred-value-row">
+                <span class="cred-val-text">${escapeHtml(stat.stat_login || '-')}</span>
+                <button class="copy-pill" onclick="copyDirect('${escapeHtml(stat.stat_login || '')}', this)" title="Копировать логин">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+            </div>
+            <div class="cred-item highlight">
+              <span class="cred-label">Пароль абонента</span>
+              <div class="cred-value-row">
+                <span class="cred-val-text">${escapeHtml(stat.stat_password || '-')}</span>
+                <button class="copy-pill" onclick="copyDirect('${escapeHtml(stat.stat_password || '')}', this)" title="Копировать пароль">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+            </div>
+            <div class="cred-item">
+              <span class="cred-label">IP-адрес VPN</span>
+              <div class="cred-value-row">
+                <span class="cred-val-text" style="color: var(--text-muted);">Не назначен</span>
+              </div>
+            </div>
+            <div class="cred-item">
+              <span class="cred-label">MAC-адрес ПК</span>
+              <div class="cred-value-row">
+                <span class="cred-val-text">${escapeHtml(primaryMac)}</span>
+                <button class="copy-pill" onclick="copyDirect('${escapeHtml(primaryMac)}', this)" title="Копировать MAC">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        mainCredContainer.innerHTML = vpn.vpn_accounts.map((acc, idx) => {
+          const accMac = (acc.host_ip && (acc.host_ip.includes('-') || acc.host_ip.includes(':')))
+            ? acc.host_ip
+            : primaryMac;
+          const blockTitle = vpn.vpn_accounts.length > 1
+            ? `<div class="account-header"><span class="section-title-badge">Учетная запись VPN #${idx + 1}</span></div>`
+            : '';
+
+          return `
+            <div class="account-block">
+              ${blockTitle}
+              <div class="credentials-grid">
+                <div class="cred-item">
+                  <span class="cred-label">VPN Сервер</span>
+                  <div class="cred-value-row">
+                    <span class="cred-val-text">${escapeHtml(vpnServerName)}</span>
+                    <button class="copy-pill" onclick="copyDirect('${escapeHtml(vpnServerName)}', this)" title="Копировать сервер">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="cred-item">
+                  <span class="cred-label">Логин VPN</span>
+                  <div class="cred-value-row">
+                    <span class="cred-val-text">${escapeHtml(acc.login || '-')}</span>
+                    <button class="copy-pill" onclick="copyDirect('${escapeHtml(acc.login || '')}', this)" title="Копировать логин">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="cred-item highlight">
+                  <span class="cred-label">Пароль VPN</span>
+                  <div class="cred-value-row">
+                    <span class="cred-val-text">${escapeHtml(acc.password || '-')}</span>
+                    <button class="copy-pill" onclick="copyDirect('${escapeHtml(acc.password || '')}', this)" title="Копировать пароль">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="cred-item">
+                  <span class="cred-label">IP-адрес VPN</span>
+                  <div class="cred-value-row">
+                    <span class="cred-val-text">${escapeHtml(acc.vpn_ip || 'Динамический')}</span>
+                    <button class="copy-pill" onclick="copyDirect('${escapeHtml(acc.vpn_ip || '')}', this)" title="Копировать VPN IP">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="cred-item">
+                  <span class="cred-label">MAC-адрес ПК</span>
+                  <div class="cred-value-row">
+                    <span class="cred-val-text">${escapeHtml(accMac)}</span>
+                    <button class="copy-pill" onclick="copyDirect('${escapeHtml(accMac)}', this)" title="Копировать MAC">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. Populate Collapsible Secondary Details
       document.getElementById('net-inventory').textContent = net.inventory_number || 'Не присвоен';
       
       const ipsContainer = document.getElementById('net-ips');
-      ipsContainer.innerHTML = (net.ip_addresses.length ? net.ip_addresses : ['Не назначен'])
+      ipsContainer.innerHTML = (net.ip_addresses && net.ip_addresses.length ? net.ip_addresses : ['Не назначен'])
         .map(ip => `
           <div class="data-value">
-            <span class="mono-badge">${ip}</span>
-            <button class="copy-pill" onclick="copyDirect('${ip}')" title="Копировать IP">
+            <span class="mono-badge">${escapeHtml(ip)}</span>
+            <button class="copy-pill" onclick="copyDirect('${escapeHtml(ip)}', this)" title="Копировать IP">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
           </div>
         `).join('');
 
       const macsContainer = document.getElementById('net-macs');
-      macsContainer.innerHTML = (net.mac_addresses.length ? net.mac_addresses : ['Не указан'])
+      macsContainer.innerHTML = (net.mac_addresses && net.mac_addresses.length ? net.mac_addresses : ['Не указан'])
         .map(mac => `
           <div class="data-value">
-            <span class="mono-badge">${mac}</span>
-            <button class="copy-pill" onclick="copyDirect('${mac}')" title="Копировать MAC">
+            <span class="mono-badge">${escapeHtml(mac)}</span>
+            <button class="copy-pill" onclick="copyDirect('${escapeHtml(mac)}', this)" title="Копировать MAC">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
           </div>
         `).join('');
 
-      // Statistics Access (Пароль виден сразу)
-      document.getElementById('stat-server').textContent = stat.stat_server;
-      document.getElementById('stat-login').textContent = stat.stat_login;
+      document.getElementById('stat-server').textContent = stat.stat_server || 'utmweb.corp.local';
+      document.getElementById('stat-login').textContent = stat.stat_login || '-';
       document.getElementById('stat-password').textContent = stat.stat_password || 'Не задан';
 
-      // VPN Settings
-      document.getElementById('vpn-server').textContent = vpn.vpn_server;
-      document.getElementById('vpn-type').textContent = vpn.vpn_type;
-      document.getElementById('vpn-encryption').textContent = vpn.vpn_encryption;
-      document.getElementById('vpn-auth').textContent = vpn.vpn_auth_method;
+      document.getElementById('vpn-server').textContent = vpnServerName;
+      document.getElementById('vpn-type').textContent = vpn.vpn_type || 'PPTP';
+      document.getElementById('vpn-encryption').textContent = vpn.vpn_encryption || 'без шифрования';
+      document.getElementById('vpn-auth').textContent = vpn.vpn_auth_method || 'MS-CHAP v2';
 
-      // VPN Accounts List (Пароли видны сразу)
-      const vpnTbody = document.getElementById('vpn-accounts-tbody');
-      if (!vpn.vpn_accounts.length) {
-        vpnTbody.innerHTML = '<tr><td colspan="4" style="color: var(--text-muted); text-align: center; padding: 1rem 0;">Учетные записи VPN не привязаны</td></tr>';
-      } else {
-        vpnTbody.innerHTML = vpn.vpn_accounts.map(acc => `
+      // Keep collapsible details collapsed by default
+      const collBody = document.getElementById('details-collapsible-body');
+      const collBtn = document.getElementById('details-toggle-btn');
+      if (collBody && collBtn) {
+        collBody.style.display = 'none';
+        collBtn.classList.remove('open');
+        collBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      // 3. Populate Dedicated Print Sheet
+      const printDateEl = document.getElementById('print-current-date');
+      if (printDateEl) printDateEl.textContent = new Date().toLocaleDateString('ru-RU');
+      document.getElementById('print-name').textContent = emp.full_name || '-';
+      document.getElementById('print-position').textContent = emp.position || '-';
+      document.getElementById('print-building').textContent = emp.building || '-';
+      document.getElementById('print-room').textContent = emp.room || '-';
+      document.getElementById('print-phone').textContent = emp.phone || '-';
+      document.getElementById('print-mac').textContent = primaryMac;
+      document.getElementById('print-sig-emp').textContent = emp.full_name || 'Сотрудник';
+
+      const printVpnRows = document.getElementById('print-vpn-rows');
+      if (!vpn.vpn_accounts || !vpn.vpn_accounts.length) {
+        printVpnRows.innerHTML = `
           <tr>
-            <td>
-              <span class="mono-badge">${acc.login}</span>
-              <button class="copy-pill" onclick="copyDirect('${acc.login}')" title="Копировать логин"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
-            </td>
-            <td>
-              <span class="mono-badge">${acc.password}</span>
-              <button class="copy-pill" onclick="copyDirect('${acc.password}')" title="Копировать пароль"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
-            </td>
-            <td><span class="mono-badge">${acc.vpn_ip}</span></td>
-            <td><span class="mono-badge">${acc.host_ip || 'Динамический'}</span></td>
+            <td class="print-mono">${escapeHtml(vpnServerName)}</td>
+            <td class="print-mono">${escapeHtml(stat.stat_login || '-')}</td>
+            <td class="print-mono">${escapeHtml(stat.stat_password || '-')}</td>
+            <td>Не назначен</td>
+            <td class="print-mono">${escapeHtml(primaryMac)}</td>
           </tr>
-        `).join('');
+        `;
+      } else {
+        printVpnRows.innerHTML = vpn.vpn_accounts.map(acc => {
+          const accMac = (acc.host_ip && (acc.host_ip.includes('-') || acc.host_ip.includes(':'))) ? acc.host_ip : primaryMac;
+          return `
+            <tr>
+              <td class="print-mono">${escapeHtml(vpnServerName)}</td>
+              <td class="print-mono"><strong>${escapeHtml(acc.login || '-')}</strong></td>
+              <td class="print-mono"><strong>${escapeHtml(acc.password || '-')}</strong></td>
+              <td class="print-mono">${escapeHtml(acc.vpn_ip || 'Динамический')}</td>
+              <td class="print-mono">${escapeHtml(accMac)}</td>
+            </tr>
+          `;
+        }).join('');
       }
 
       if (lastCandidates && lastCandidates.length > 0) {
@@ -2993,8 +3566,7 @@
 
     function copyConsoleLogs() {
       const body = document.getElementById('console-body');
-      navigator.clipboard.writeText(body.innerText);
-      showToast('Все логи скопированы');
+      if (body) copyDirect(body.innerText);
     }
 
     function escapeHtml(text) {
@@ -3028,15 +3600,61 @@
       setTimeout(() => toast.classList.remove('visible'), 2200);
     }
 
-    function copyDirect(text) {
-      if (!text || text === '-') return;
-      navigator.clipboard.writeText(text);
-      showToast(`Скопировано: ${text}`);
+    function copyDirect(text, btn) {
+      if (!text || text === '-' || text === 'Не назначен' || text === 'Не указан' || text === 'Динамический') return;
+
+      function onCopied() {
+        showToast(`Скопировано: ${text}`);
+        if (btn) {
+          btn.classList.add('copied');
+          const originalSvg = btn.innerHTML;
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          setTimeout(() => {
+            btn.innerHTML = originalSvg;
+            btn.classList.remove('copied');
+          }, 1500);
+        }
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+          .then(onCopied)
+          .catch(() => fallbackCopy(text, onCopied));
+      } else {
+        fallbackCopy(text, onCopied);
+      }
     }
 
-    function copyValue(elementId) {
+    function fallbackCopy(text, onSuccess) {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "-9999px";
+        textArea.style.left = "-9999px";
+        textArea.style.opacity = "0";
+        textArea.setAttribute("readonly", "");
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        if (successful) {
+          if (onSuccess) onSuccess();
+          else showToast(`Скопировано: ${text}`);
+        } else {
+          showToast("Не удалось скопировать");
+        }
+      } catch (err) {
+        console.error("Fallback copy error:", err);
+        showToast("Ошибка копирования");
+      }
+    }
+
+    function copyValue(elementId, btn) {
       const el = document.getElementById(elementId);
-      if (el) copyDirect(el.textContent.trim());
+      if (el) copyDirect(el.textContent.trim(), btn);
     }
   </script>
 
