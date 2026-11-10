@@ -46,6 +46,7 @@ async def search_memo(
     name: str | None = Query(None, description="Поиск по ФИО (совместимость)", include_in_schema=False),
     mac: str | None = Query(None, description="Поиск по MAC (совместимость)", include_in_schema=False),
     ip: str | None = Query(None, description="Поиск по IP (совместимость)", include_in_schema=False),
+    save_history: bool = Query(True, description="Сохранять ли запрос в историю поиска", include_in_schema=False),
     service: BaseMemoService = Depends(get_memo_service),
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> MemoResponseSchema | UserCandidatesResponseSchema:
@@ -108,7 +109,7 @@ async def search_memo(
             summary = f"Найдено сотрудников: {len(result.candidates)}"
 
         raw_query = q or name or ip or mac or (f"ID={user_id}" if user_id else "")
-        if raw_query and current_user:
+        if raw_query and current_user and save_history:
             add_search_history(current_user["id"], raw_query, summary)
     except Exception:
         pass

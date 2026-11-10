@@ -323,6 +323,16 @@
       stroke: var(--accent-blue);
     }
 
+    .search-input-box.is-searching .search-icon {
+      stroke: var(--accent-blue);
+      animation: search-icon-pulse 0.75s ease-in-out infinite alternate;
+    }
+
+    @keyframes search-icon-pulse {
+      from { opacity: 0.35; transform: scale(0.88); }
+      to { opacity: 1; transform: scale(1.12); }
+    }
+
     .search-input {
       width: 100%;
       background: rgba(0, 0, 0, 0.5);
@@ -2718,18 +2728,102 @@
     }
 
     // ==========================================================================
-    // Unified Search Input Controls
+    // Unified Search Input Controls (with Live Search & Debounce)
     // ==========================================================================
     const searchInput = document.getElementById('search-input');
     const clearBtn = document.getElementById('clear-btn');
+    const searchForm = document.getElementById('search-form');
+
+    let liveSearchTimer = null;
+    let liveSearchAbortController = null;
 
     searchInput.addEventListener('input', () => {
+      const val = searchInput.value.trim();
       clearBtn.style.display = searchInput.value.length > 0 ? 'inline-flex' : 'none';
+
+      // 1. Сбрасываем предыдущий таймер дебаунса
+      clearTimeout(liveSearchTimer);
+
+      // 2. Отменяем предыдущий сетевой запрос, если он еще не завершился
+      if (liveSearchAbortController) {
+        liveSearchAbortController.abort();
+        liveSearchAbortController = null;
+      }
+      if (searchForm) searchForm.classList.remove('is-searching');
+
+      // 3. Если поле очищено или введено меньше 2 символов — убираем подсказки
+      if (val.length < 2) {
+        candidatesView.style.display = 'none';
+        errorState.style.display = 'none';
+        return;
+      }
+
+      // 4. Микропауза 300мс (debounce): отправляем запрос только при паузе в наборе
+      liveSearchTimer = setTimeout(() => {
+        performLiveSearch(val);
+      }, 300);
     });
+
+    async function performLiveSearch(query) {
+      liveSearchAbortController = new AbortController();
+      if (searchForm) searchForm.classList.add('is-searching');
+
+      try {
+        const url = `/api/v1/memo/search?q=${encodeURIComponent(query)}&save_history=false`;
+        const headers = {};
+        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+        const response = await fetch(url, {
+          headers,
+          signal: liveSearchAbortController.signal,
+        });
+
+        if (searchForm) searchForm.classList.remove('is-searching');
+
+        if (response.status === 401) {
+          handleLogout();
+          return;
+        }
+
+        // Если ничего не найдено по промежуточному запросу — мягко скрываем список
+        if (!response.ok) {
+          candidatesView.style.display = 'none';
+          return;
+        }
+
+        const data = await response.json();
+
+        // Если найдено несколько кандидатов — динамически обновляем список без скролла
+        if (data.candidates && Array.isArray(data.candidates)) {
+          errorState.style.display = 'none';
+          resultView.style.display = 'none';
+          renderCandidates(data.candidates, false);
+        } else if (data.employee) {
+          // Если совпадение всего одно — отображаем карточку без рывка скролла
+          errorState.style.display = 'none';
+          candidatesView.style.display = 'none';
+          renderMemo(data, false);
+        }
+      } catch (err) {
+        if (searchForm) searchForm.classList.remove('is-searching');
+        if (err.name !== 'AbortError') {
+          console.warn('Live search error:', err);
+        }
+      }
+    }
 
     function clearSearch() {
       searchInput.value = '';
       clearBtn.style.display = 'none';
+      clearTimeout(liveSearchTimer);
+      if (liveSearchAbortController) {
+        liveSearchAbortController.abort();
+        liveSearchAbortController = null;
+      }
+      if (searchForm) searchForm.classList.remove('is-searching');
+      candidatesView.style.display = 'none';
+      resultView.style.display = 'none';
+      errorState.style.display = 'none';
       searchInput.focus();
     }
 
@@ -2751,6 +2845,13 @@
 
     async function handleSearch(e) {
       if (e) e.preventDefault();
+      clearTimeout(liveSearchTimer);
+      if (liveSearchAbortController) {
+        liveSearchAbortController.abort();
+        liveSearchAbortController = null;
+      }
+      if (searchForm) searchForm.classList.remove('is-searching');
+
       const query = searchInput.value.trim();
       if (!query) return;
 
@@ -2796,7 +2897,7 @@
       }
     }
 
-    function renderCandidates(candidates) {
+    function renderCandidates(candidates, shouldScroll = true) {
       lastCandidates = candidates;
       candidatesCount.textContent = candidates.length;
       backCount.textContent = candidates.length;
@@ -2853,7 +2954,9 @@
       }).join('');
 
       candidatesView.style.display = 'flex';
-      candidatesView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (shouldScroll) {
+        candidatesView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     async function selectCandidate(userId) {
@@ -2912,7 +3015,7 @@
       }
     }
 
-    function renderMemo(data) {
+    function renderMemo(data, shouldScroll = true) {
       const emp = data.employee;
       const net = data.network;
       const stat = data.statistics;
@@ -3145,7 +3248,9 @@
       }
 
       resultView.style.display = 'flex';
-      resultView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (shouldScroll) {
+        resultView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     // ==========================================================================
