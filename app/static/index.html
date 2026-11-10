@@ -776,6 +776,35 @@
       gap: 0.5rem;
     }
 
+    /* Кнопка скачивания .bat скрипта */
+    .btn-download-bat {
+      background: rgba(10, 132, 255, 0.12);
+      border: 1px solid rgba(10, 132, 255, 0.35);
+      color: #70b4ff;
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: var(--transition-apple);
+      margin-top: 0.6rem;
+    }
+
+    .btn-download-bat:hover {
+      background: rgba(10, 132, 255, 0.22);
+      border-color: var(--accent-blue);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-download-bat:active {
+      transform: scale(0.98);
+    }
+
     /* ==========================================================================
        Collapsible Details Accordion
        ========================================================================== */
@@ -3091,6 +3120,12 @@
               </div>
             </div>
           </div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.6rem;">
+            <button type="button" class="btn-download-bat" onclick="downloadVpnBat('${escapeHtml(stat.stat_login || '')}', '${escapeHtml(stat.stat_password || '')}', '${escapeHtml(vpnServerName)}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Скачать скрипт настройки (.bat)</span>
+            </button>
+          </div>
         `;
       } else {
         mainCredContainer.innerHTML = vpn.vpn_accounts.map((acc, idx) => {
@@ -3154,6 +3189,12 @@
                     </button>
                   </div>
                 </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end;">
+                <button type="button" class="btn-download-bat" onclick="downloadVpnBat('${escapeHtml(acc.login)}', '${escapeHtml(acc.password)}', '${escapeHtml(vpnServerName)}')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span>Скачать настройщик (.bat)</span>
+                </button>
               </div>
             </div>
           `;
@@ -3760,6 +3801,49 @@
     function copyValue(elementId, btn) {
       const el = document.getElementById(elementId);
       if (el) copyDirect(el.textContent.trim(), btn);
+    }
+
+    // Генерация и скачивание .bat скрипта настройки VPN (без прав администратора)
+    function downloadVpnBat(login, password, server) {
+      if (!login || !password) {
+        showToast('Логин или пароль отсутствуют');
+        return;
+      }
+
+      const vpnName = 'Corporate_VPN';
+      const vpnServer = server || '';
+
+      const batContent = `@echo off
+chcp 65001 >nul
+title Настройка VPN
+
+echo Создание профиля VPN...
+powershell -Command "Add-VpnConnection -Name '${vpnName}' -ServerAddress '${vpnServer}' -TunnelType Pptp -EncryptionLevel Optional -AuthenticationMethod MSChapv2 -Force"
+
+echo Подключение к сети...
+rasdial "${vpnName}" "${login}" "${password}"
+
+echo.
+if %errorlevel% equ 0 (
+    echo [OK] VPN успешно настроен и подключен!
+) else (
+    echo [INFO] Профиль создан. Проверьте сеть и повторите подключение.
+)
+echo.
+pause
+`;
+
+      const blob = new Blob([batContent], { type: 'application/x-bat;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `setup_vpn_${login}.bat`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(`Настройщик setup_vpn_${login}.bat скачан`);
     }
   </script>
 
