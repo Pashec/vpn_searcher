@@ -97,6 +97,15 @@ async def serve_index():
     return {"status": "online", "message": "Static index.html not found"}
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Отдает иконку вкладки для браузера."""
+    favicon_file = STATIC_DIR / "favicon.svg"
+    if favicon_file.exists():
+        return FileResponse(favicon_file, media_type="image/svg+xml")
+    return {"status": "not found"}
+
+
 @app.get("/health", tags=["Служебные"])
 async def health_check():
     """Проверка доступности сервиса."""

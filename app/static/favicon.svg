@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#161a29" />
+      <stop offset="100%" stop-color="#080a10" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#0a84ff" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+    <linearGradient id="coreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+
+  <!-- Темная плашка-сквиркл в стиле macOS/Apple -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bgGrad)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
+
+  <!-- Неоновый контур защитного щита (VPN) -->
+  <path d="M32 11 L48 17 C48 31.5 39.5 43.5 32 48.5 C24.5 43.5 16 31.5 16 17 Z" 
+        fill="rgba(10, 132, 255, 0.08)" 
+        stroke="url(#accentGrad)" 
+        stroke-width="3" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" />
+
+  <!-- Линза поиска + узел сети (Searcher) -->
+  <circle cx="30" cy="27" r="6" fill="none" stroke="url(#coreGrad)" stroke-width="2.8" />
+  <path d="M34.5 31.5 L41 38" stroke="url(#coreGrad)" stroke-width="2.8" stroke-linecap="round" />
+
+  <!-- Центральная точка-маяк -->
+  <circle cx="30" cy="27" r="2" fill="#38bdf8" />
+</svg>
