@@ -7,9 +7,9 @@ class UserCandidateSchema(BaseModel):
     full_name: str = Field(..., description="Ф.И.О. сотрудника", examples=["Иванов Иван Иванович"])
     login: str = Field(..., description="Основной логин абонента", examples=["ivanov_ii"])
     building: str | None = Field(None, description="Номер корпуса", examples=["2"])
-    room: str | None = Field(None, description="Номер кабинета", examples=["709"])
-    phone: str | None = Field(None, description="Внутренний номер телефона", examples=["2764"])
-    ip: str | None = Field(None, description="Рабочий IP-адрес", examples=["10.146.0.115"])
+    room: str | None = Field(None, description="Номер кабинета", examples=["101"])
+    phone: str | None = Field(None, description="Внутренний номер телефона", examples=["1234"])
+    ip: str | None = Field(None, description="Рабочий IP-адрес", examples=["10.100.0.144"])
 
 
 class UserCandidatesResponseSchema(BaseModel):
@@ -24,8 +24,8 @@ class VpnAccountSchema(BaseModel):
     """Учетная запись VPN пользователя."""
     login: str = Field(..., description="Логин учетной записи VPN", examples=["vpn_ivanov"])
     password: str = Field(..., description="Пароль учетной записи VPN", examples=["0d8bccb4"])
-    vpn_ip: str = Field(..., description="Выделенный статический IP-адрес VPN", examples=["172.22.254.18"])
-    host_ip: str | None = Field(None, description="Привязанный IP или MAC рабочего места", examples=["10.146.0.115"])
+    vpn_ip: str = Field(..., description="Выделенный статический IP-адрес VPN", examples=["10.10.15.20"])
+    host_ip: str | None = Field(None, description="Привязанный IP или MAC рабочего места", examples=["10.100.0.144"])
 
 
 class VpnSettingsSchema(BaseModel):
@@ -45,8 +45,8 @@ class EmployeeInfoSchema(BaseModel):
     full_name: str = Field(..., description="Ф.И.О. сотрудника", examples=["Иванов Иван Иванович"])
     building: str = Field(default="1", description="Номер корпуса", examples=["1", "2", "8"])
     position: str = Field(..., description="Должность и подразделение", examples=["Инженер технической поддержки"])
-    room: str = Field(..., description="Номер кабинета", examples=["709"])
-    phone: str = Field(..., description="Внутренний номер телефона", examples=["2764"])
+    room: str = Field(..., description="Номер кабинета", examples=["101"])
+    phone: str = Field(..., description="Внутренний номер телефона", examples=["1234"])
     tariff: str = Field(default="Безлимитный", description="Название тарифного плана")
 
 
@@ -56,7 +56,7 @@ class NetworkInfoSchema(BaseModel):
     ip_addresses: list[str] = Field(
         default_factory=list,
         description="Список локальных IP-адресов",
-        examples=[["10.146.0.115"]]
+        examples=[["10.100.0.144"]]
     )
     mac_addresses: list[str] = Field(
         default_factory=list,

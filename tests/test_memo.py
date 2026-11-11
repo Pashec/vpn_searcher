@@ -58,7 +58,7 @@ def test_search_by_name(client, auth_headers):
 
 def test_search_multiple_candidates(client, auth_headers):
     """При неоднозначном поиске (несколько совпадений) возвращается список кандидатов."""
-    response = client.get("/api/v1/memo/search?name=Демин", headers=auth_headers)
+    response = client.get("/api/v1/memo/search?name=Сидоров", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert "candidates" in data
@@ -79,8 +79,8 @@ def test_get_by_user_id(client, auth_headers):
     assert response.status_code == 200
     data = response.json()
     assert "employee" in data
-    assert data["employee"]["full_name"] == "Демин Вячеслав Юрьевич"
-    assert data["statistics"]["stat_login"] == "vdemin"
+    assert data["employee"]["full_name"] == "Сидоров Алексей Юрьевич"
+    assert data["statistics"]["stat_login"] == "sidorov"
     assert len(data["vpn"]["vpn_accounts"]) > 0
 
 
@@ -106,7 +106,7 @@ def test_unified_search_by_room_building(client, auth_headers):
     assert len(data_multi["candidates"]) == 2
     logins = [c["login"] for c in data_multi["candidates"]]
     assert "petrov_ps" in logins
-    assert "vdemin" in logins
+    assert "sidorov" in logins
 
     resp_single = client.get("/api/v1/memo/search?q=1-324", headers=auth_headers)
     assert resp_single.status_code == 200
@@ -153,15 +153,15 @@ def test_unified_search_by_unique_login(client, auth_headers):
 
 
 def test_unified_search_by_partial_login(client, auth_headers):
-    """Единый поиск по частичному логину с несколькими кандидатами ('vdemin' -> vdemin, vdemina)."""
-    resp = client.get("/api/v1/memo/search?q=vdemin", headers=auth_headers)
+    """Единый поиск по частичному логину с несколькими кандидатами ('sidorov' -> sidorov, sidorova)."""
+    resp = client.get("/api/v1/memo/search?q=sidorov", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert "candidates" in data
     assert len(data["candidates"]) == 2
     logins = [c["login"] for c in data["candidates"]]
-    assert "vdemin" in logins
-    assert "vdemina" in logins
+    assert "sidorov" in logins
+    assert "sidorova" in logins
 
 
 def test_unified_search_by_full_name(client, auth_headers):
@@ -203,13 +203,13 @@ def test_live_urfa_search_by_name(client, auth_headers):
 def test_live_urfa_multiple_candidates(client, auth_headers):
     """Проверка живого поиска с несколькими совпадениями (список кандидатов)."""
     app.dependency_overrides.pop(get_memo_service, None)
-    response = client.get("/api/v1/memo/search?name=Демин", headers=auth_headers)
+    response = client.get("/api/v1/memo/search?name=Иванов", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert "candidates" in data
     assert len(data["candidates"]) >= 2
     logins = [c["login"] for c in data["candidates"]]
-    assert any("demin" in l for l in logins)
+    assert any("ivanov" in l for l in logins)
 
 
 @pytest.mark.skipif(not is_live_server_available(), reason="Боевой сервер биллинга недоступен из текущей сети")

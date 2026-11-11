@@ -102,7 +102,7 @@ class FakeMemoService(BaseMemoService):
             "user_id": 3,
             "memo": MemoResponseSchema(
                 employee=EmployeeInfoSchema(
-                    full_name="Демина Анна Павловна",
+                    full_name="Сидорова Анна Павловна",
                     position="Бухгалтер",
                     building="1",
                     room="205",
@@ -116,8 +116,8 @@ class FakeMemoService(BaseMemoService):
                 ),
                 statistics=StatAccessSchema(
                     stat_server="utmweb.corp.local",
-                    stat_login="vdemina",
-                    stat_password="DeminaPass2026",
+                    stat_login="sidorova",
+                    stat_password="SidorovaPass2026",
                 ),
                 vpn=VpnSettingsSchema(
                     vpn_server="vpn.corp.local",
@@ -132,7 +132,7 @@ class FakeMemoService(BaseMemoService):
             "user_id": 4,
             "memo": MemoResponseSchema(
                 employee=EmployeeInfoSchema(
-                    full_name="Демин Вячеслав Юрьевич",
+                    full_name="Сидоров Алексей Юрьевич",
                     position="Ведущий специалист",
                     building="2",
                     room="709",
@@ -146,8 +146,8 @@ class FakeMemoService(BaseMemoService):
                 ),
                 statistics=StatAccessSchema(
                     stat_server="utmweb.corp.local",
-                    stat_login="vdemin",
-                    stat_password="DeminPassword789",
+                    stat_login="sidorov",
+                    stat_password="SidorovPassword789",
                 ),
                 vpn=VpnSettingsSchema(
                     vpn_server="vpn.corp.local",
@@ -156,8 +156,8 @@ class FakeMemoService(BaseMemoService):
                     vpn_auth_method="MS-CHAP v2",
                     vpn_accounts=[
                         VpnAccountSchema(
-                            login="vdemin_vpn",
-                            password="VpnDeminSecure1",
+                            login="sidorov_vpn",
+                            password="VpnSidorovSecure1",
                             vpn_ip="10.10.15.77",
                             host_ip="10.100.2.80",
                         )
