@@ -3810,8 +3810,8 @@
         return;
       }
 
-      const vpnName = 'Corporate_VPN';
-      const vpnServer = server || '';
+      const vpnName = 'Интернет';
+      const vpnServer = server || 'vpn.dstu.local';
 
       const batContent = `@echo off
 chcp 65001 >nul
@@ -3833,7 +3833,8 @@ echo.
 pause
 `;
 
-      const blob = new Blob([batContent], { type: 'application/x-bat;charset=utf-8' });
+      const batContentCrlf = batContent.replace(/\r?\n/g, '\r\n');
+      const blob = new Blob([batContentCrlf], { type: 'application/x-bat;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
