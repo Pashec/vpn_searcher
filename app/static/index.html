@@ -3805,7 +3805,7 @@
       if (el) copyDirect(el.textContent.trim(), btn);
     }
 
-    // Генерация и скачивание .bat скрипта настройки VPN (без прав администратора)
+    // генерация батника для настройки впн без админки
     function downloadVpnBat(login, password, server) {
       if (!login || !password) {
         showToast('Логин или пароль отсутствуют');
@@ -3815,24 +3815,81 @@
       const vpnName = 'Интернет';
       const vpnServer = server || 'vpn.dstu.local';
 
+      // экранируем спецсимволы для powershell
+      const safeLogin = login.replace(/[`"$]/g, '`$&');
+      const safePassword = password.replace(/[`"$]/g, '`$&');
+
+      // скрипт настройки профиля и сохранения пароля через rasapi32
+      const psScript = `Write-Host "[1/3] Создание профиля VPN..." -ForegroundColor Cyan
+Get-VpnConnection -Name "${vpnName}" -ErrorAction SilentlyContinue | Remove-VpnConnection -Force
+Add-VpnConnection -Name "${vpnName}" -ServerAddress "${vpnServer}" -TunnelType Pptp -EncryptionLevel Optional -AuthenticationMethod MSChapv2 -RememberCredential -Force
+
+Write-Host "[2/3] Сохранение логина и пароля в Windows..." -ForegroundColor Cyan
+$pbk = "$env:APPDATA\\Microsoft\\Network\\Connections\\Pbk\\rasphone.pbk"
+if (Test-Path $pbk) {
+    $c = Get-Content $pbk -Raw
+    $c = $c -replace "PreviewUserPw=1", "PreviewUserPw=0"
+    Set-Content -Path $pbk -Value $c -Encoding UTF8
+}
+
+$sig = @'
+using System;
+using System.Runtime.InteropServices;
+[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+public struct RASDIALPARAMS {
+    public uint dwSize;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 257)] public string szEntryName;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 129)] public string szPhoneNumber;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 129)] public string szCallbackNumber;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 257)] public string szUserName;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 257)] public string szPassword;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 15)] public string szDomain;
+    public uint dwSubEntry;
+    public IntPtr dwCallbackId;
+    public uint dwIfIndex;
+}
+public static class RasApi {
+    [DllImport("rasapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    public static extern uint RasSetEntryDialParams(string p, ref RASDIALPARAMS d, bool r);
+}
+'@
+Add-Type -TypeDefinition $sig -PassThru | Out-Null
+$d = New-Object RASDIALPARAMS
+$d.dwSize = [System.Runtime.InteropServices.Marshal]::SizeOf($d)
+$d.szEntryName = "${vpnName}"
+$d.szUserName = "${safeLogin}"
+$d.szPassword = "${safePassword}"
+$d.szDomain = ""
+$res = [RasApi]::RasSetEntryDialParams($pbk, [ref]$d, $false)
+if ($res -eq 0) {
+    Write-Host "[OK] Логин и пароль успешно сохранены в Windows!" -ForegroundColor Green
+}
+
+Write-Host "[3/3] Подключение к сети..." -ForegroundColor Cyan
+rasdial "${vpnName}"
+`;
+
+      // кодируем в utf-8 base64 чтобы cmd.exe не ломал спецсимволы
+      const b64 = btoa(encodeURIComponent(psScript).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+
       const batContent = `@echo off
 chcp 65001 >nul
 title Настройка VPN
 
-echo Создание профиля VPN...
-powershell -Command "Get-VpnConnection -Name '${vpnName}' -ErrorAction SilentlyContinue | Remove-VpnConnection -Force; Add-VpnConnection -Name '${vpnName}' -ServerAddress '${vpnServer}' -TunnelType Pptp -EncryptionLevel Optional -AuthenticationMethod MSChapv2 -RememberCredential -Force"
+echo ========================================================
+echo Настройка VPN: ${vpnName}
+echo Логин: ${login}
+echo Сервер: ${vpnServer}
+echo ========================================================
+echo.
 
-echo Сохранение учетных данных...
-cmdkey /generic:RasCredentials!${vpnName} /user:${login} /pass:${password} >nul 2>&1
-
-echo Подключение к сети...
-rasdial "${vpnName}" "${login}" "${password}"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$s=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${b64}')); iex $s"
 
 echo.
 if %errorlevel% equ 0 (
     echo [OK] VPN успешно настроен и подключен!
 ) else (
-    echo [INFO] Профиль создан. Проверьте сеть и повторите подключение.
+    echo [INFO] Профиль создан, пароль сохранен. Повторите попытку подключения.
 )
 echo.
 pause
