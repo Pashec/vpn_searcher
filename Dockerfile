@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Копирование исходного кода приложения
 COPY app/ app/
-COPY run.py .
+COPY run.py bot.py ./
 
 # Директория для хранения базы данных SQLite и аватарок пользователей
 RUN mkdir -p /app/data/avatars

@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     APP_TITLE: str = "Pashec Inc. vpn_searcher"
     APP_VERSION: str = "v1.0.0"
 
+    # Telegram Bot
+    TG_BOT_TOKEN: str = ""
+    TG_ADMIN_ID: int = 0
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
