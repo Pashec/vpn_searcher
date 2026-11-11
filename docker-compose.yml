@@ -11,3 +11,13 @@ services:
       - ./data:/app/data
     env_file:
       - .env
+
+  vpn_bot:
+    build: .
+    container_name: vpn_bot
+    restart: unless-stopped
+    command: python bot.py
+    env_file:
+      - .env
+    depends_on:
+      - vpn_searcher
