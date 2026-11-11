@@ -3818,7 +3818,10 @@ chcp 65001 >nul
 title Настройка VPN
 
 echo Создание профиля VPN...
-powershell -Command "Get-VpnConnection -Name '${vpnName}' -ErrorAction SilentlyContinue | Remove-VpnConnection -Force; Add-VpnConnection -Name '${vpnName}' -ServerAddress '${vpnServer}' -TunnelType Pptp -EncryptionLevel Optional -AuthenticationMethod MSChapv2 -Force"
+powershell -Command "Get-VpnConnection -Name '${vpnName}' -ErrorAction SilentlyContinue | Remove-VpnConnection -Force; Add-VpnConnection -Name '${vpnName}' -ServerAddress '${vpnServer}' -TunnelType Pptp -EncryptionLevel Optional -AuthenticationMethod MSChapv2 -RememberCredential -Force"
+
+echo Сохранение учетных данных...
+cmdkey /generic:RasCredentials!${vpnName} /user:${login} /pass:${password} >nul 2>&1
 
 echo Подключение к сети...
 rasdial "${vpnName}" "${login}" "${password}"
