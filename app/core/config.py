@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # Telegram Bot
     TG_BOT_TOKEN: str = ""
     TG_ADMIN_ID: int = 0
+    TG_PROXY: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

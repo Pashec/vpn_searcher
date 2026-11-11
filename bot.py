@@ -4,6 +4,7 @@ from html import escape
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
@@ -184,8 +185,19 @@ async def main():
         logger.error("TG_BOT_TOKEN не задан в .env! Запуск бота отменен.")
         return
 
-    bot = Bot(token=settings.TG_BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    logger.info("Подключение к Telegram API...")
+    session = None
+    if settings.TG_PROXY:
+        masked_proxy = settings.TG_PROXY.split("@")[-1] if "@" in settings.TG_PROXY else settings.TG_PROXY
+        logger.info(f"Подключение через прокси: {masked_proxy}")
+        session = AiohttpSession(proxy=settings.TG_PROXY)
+    else:
+        logger.info("Подключение к Telegram API напрямую (без прокси)...")
+
+    bot = Bot(
+        token=settings.TG_BOT_TOKEN,
+        session=session,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    )
 
     # Удаляем вебхук
     await bot.delete_webhook(drop_pending_updates=True)
