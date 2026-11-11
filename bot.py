@@ -8,13 +8,16 @@ from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("vpn_bot")
+
 from app.core.config import settings
 from app.schemas.memo import MemoResponseSchema, UserCandidatesResponseSchema
 from app.services.urfa_client import UrfaMemoService
-
-# Настройка логирования
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger("vpn_bot")
 
 dp = Dispatcher()
 memo_service = UrfaMemoService()
@@ -26,7 +29,6 @@ def format_memo_message(memo: MemoResponseSchema) -> str:
     net = memo.network
     vpn = memo.vpn
 
-    # Список MAC-адресов
     primary_mac = net.mac_addresses[0] if (net.mac_addresses and len(net.mac_addresses) > 0) else "Не указан"
 
     lines = [
@@ -41,7 +43,6 @@ def format_memo_message(memo: MemoResponseSchema) -> str:
         "",
     ]
 
-    # Если есть конкретные учетные записи VPN
     if vpn.vpn_accounts:
         for idx, acc in enumerate(vpn.vpn_accounts, start=1):
             title = f"🔑 <b>Учётная запись VPN #{idx}:</b>" if len(vpn.vpn_accounts) > 1 else "🔑 <b>Учётная запись VPN:</b>"
@@ -57,7 +58,6 @@ def format_memo_message(memo: MemoResponseSchema) -> str:
                 "",
             ])
     else:
-        # Резервный вывод (из статистики)
         lines.extend([
             "🔑 <b>Учётная запись:</b>",
             f"• Логин: <code>{escape(memo.statistics.stat_login or '-')}</code>",
@@ -72,13 +72,17 @@ def check_access(user_id: int) -> bool:
     """Проверяет доступ пользователя (только для владельца бота)."""
     if not settings.TG_ADMIN_ID:
         return True
-    return user_id == settings.TG_ADMIN_ID
+    is_allowed = user_id == settings.TG_ADMIN_ID
+    if not is_allowed:
+        logger.warning(f"Попытка доступа от неавторизованного пользователя ID: {user_id} (ожидается: {settings.TG_ADMIN_ID})")
+    return is_allowed
 
 
 @dp.message(CommandStart())
 async def cmd_start(message: Message):
+    logger.info(f"Получена команда /start от {message.from_user.id} (@{message.from_user.username})")
     if not check_access(message.from_user.id):
-        await message.answer("⛔ Доступ запрещён.")
+        await message.answer(f"⛔ Доступ запрещён. Твой ID: <code>{message.from_user.id}</code>")
         return
 
     await message.answer(
@@ -93,8 +97,9 @@ async def cmd_start(message: Message):
 
 @dp.message(F.text)
 async def handle_search(message: Message, bot: Bot):
+    logger.info(f"Поисковый запрос от {message.from_user.id}: '{message.text}'")
     if not check_access(message.from_user.id):
-        await message.answer("⛔ Доступ запрещён.")
+        await message.answer(f"⛔ Доступ запрещён. Твой ID: <code>{message.from_user.id}</code>")
         return
 
     query = message.text.strip()
@@ -106,10 +111,11 @@ async def handle_search(message: Message, bot: Bot):
     try:
         result = await memo_service.search(query)
     except ConnectionError as e:
+        logger.error(f"Ошибка биллинга при поиске '{query}': {e}")
         await message.answer(f"⚠️ <b>Ошибка связи с биллингом:</b>\n{escape(str(e))}")
         return
     except Exception as e:
-        logger.exception("Ошибка при поиске через бота")
+        logger.exception("Исключение при поиске через бота")
         await message.answer(f"⚠️ <b>Произошла ошибка:</b>\n{escape(str(e))}")
         return
 
@@ -117,13 +123,11 @@ async def handle_search(message: Message, bot: Bot):
         await message.answer(f"🔍 По запросу <b>«{escape(query)}»</b> никто не найден.")
         return
 
-    # Вариант 1: Найден ровно один сотрудник -> отдаем памятку
     if isinstance(result, MemoResponseSchema):
         text = format_memo_message(result)
         await message.answer(text)
         return
 
-    # Вариант 2: Найдено несколько кандидатов -> строим список кнопок
     if isinstance(result, UserCandidatesResponseSchema):
         candidates = result.candidates
         buttons = []
@@ -148,8 +152,9 @@ async def handle_search(message: Message, bot: Bot):
 
 @dp.callback_query(F.data.startswith("uid:"))
 async def handle_user_selection(callback: CallbackQuery):
+    logger.info(f"Клик по кандидату от {callback.from_user.id}: {callback.data}")
     if not check_access(callback.from_user.id):
-        await callback.answer("Доступ запрещён", show_alert=True)
+        await callback.answer(f"Доступ запрещён. ID: {callback.from_user.id}", show_alert=True)
         return
 
     try:
@@ -180,9 +185,12 @@ async def main():
         return
 
     bot = Bot(token=settings.TG_BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    logger.info("Запуск Telegram-бота vpn_searcher...")
-    # Сбрасываем старые накопившиеся сообщения
+    logger.info("Подключение к Telegram API...")
+
+    # Удаляем вебхук
     await bot.delete_webhook(drop_pending_updates=True)
+    logger.info("Старый вебхук сброшен. Начинаем слушать сообщения (Long Polling)...")
+
     await dp.start_polling(bot)
 
 
